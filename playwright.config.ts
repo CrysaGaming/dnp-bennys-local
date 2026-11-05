@@ -21,6 +21,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
     env: {
+      BETTER_AUTH_URL: "http://localhost:3100",
       SEED_ADMIN_USERNAME: "admin",
       SEED_ADMIN_PASSWORD: "Start-Passwort-123",
       SEED_RADIO_CHANNEL: "1234",

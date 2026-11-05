@@ -50,11 +50,16 @@ const loadContext = cache(async (): Promise<SessionContext | null> =>
   getSessionContext(await headers()),
 );
 
+/** Startroute für einen Mitarbeiter: erst das neue Passwort, dann das Dashboard. */
+export function startRoute(ctx: SessionContext): string {
+  return ctx.mustChangePassword ? "/settings?pw=1" : "/dashboard";
+}
+
 export async function requireSession(opts: { allowMustChangePassword?: boolean } = {}): Promise<SessionContext> {
   const ctx = await loadContext();
 
   if (!ctx) redirect("/login");
-  if (ctx.mustChangePassword && !opts.allowMustChangePassword) redirect("/settings?pw=1");
+  if (ctx.mustChangePassword && !opts.allowMustChangePassword) redirect(startRoute(ctx));
 
   return ctx;
 }

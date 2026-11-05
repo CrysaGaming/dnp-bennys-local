@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { auth } from "@/lib/auth";
 import { internalEmail } from "@/lib/auth-email";
 import { prisma } from "@/lib/prisma";
-import { getSessionContext } from "@/lib/dal";
-import { createRank } from "@tests/helpers/factories";
+import { getSessionContext, startRoute } from "@/lib/dal";
+import { createRank, makeCtx } from "@tests/helpers/factories";
 import { signInHeaders } from "@tests/helpers/session";
 import type { Permission } from "@/generated/prisma/enums";
 
@@ -67,5 +67,14 @@ describe("getSessionContext", () => {
 
   it("null ohne Cookie", async () => {
     expect(await getSessionContext(new Headers())).toBeNull();
+  });
+});
+
+describe("startRoute", () => {
+  it("führt zur Passwortseite, wenn das Flag gesetzt ist", async () => {
+    const ctx = await makeCtx({ username: "start-route" });
+
+    expect(startRoute({ ...ctx, mustChangePassword: true })).toBe("/settings?pw=1");
+    expect(startRoute({ ...ctx, mustChangePassword: false })).toBe("/dashboard");
   });
 });
