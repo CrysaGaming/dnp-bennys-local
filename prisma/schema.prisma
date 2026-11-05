@@ -1,0 +1,555 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────── Better Auth (generiert, plus username- und admin-Plugin) ─────────────
+
+model User {
+  id              String    @id
+  name            String
+  email           String    @unique
+  emailVerified   Boolean   @default(false)
+  image           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  username        String?   @unique
+  displayUsername String?
+  role            String?   @default("user")
+  banned          Boolean?  @default(false)
+  banReason       String?
+  banExpires      DateTime?
+
+  sessions   Session[]
+  accounts   Account[]
+  employee   Employee?
+  preference UserPreference?
+  auditLogs  AuditLog[]
+
+  @@map("user")
+}
+
+model Session {
+  id             String   @id
+  expiresAt      DateTime
+  token          String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  impersonatedBy String?
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ───────────── Enums ─────────────
+
+enum Permission {
+  CUSTOMERS_VIEW
+  CUSTOMERS_EDIT
+  LOYALTY_MANAGE
+  RESOURCES_VIEW
+  RESOURCES_MANAGE
+  ORDERS_VIEW
+  ORDERS_CREATE
+  ORDERS_MANAGE
+  INVOICES_MANAGE
+  INVENTORY_VIEW
+  INVENTORY_MANAGE
+  PRICELIST_MANAGE
+  EMPLOYEES_VIEW
+  EMPLOYEES_MANAGE
+  RANKS_MANAGE
+  TIMES_VIEW_ALL
+  TIMES_MANAGE
+  COMPANY_MANAGE
+  AUDIT_VIEW
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  ON_LEAVE
+  TERMINATED
+}
+
+enum CompanyStatusMode {
+  AUTO
+  MANUAL
+}
+
+enum OrderType {
+  REPAIR
+  TUNING
+  PAINT
+  TOWING
+  OTHER
+}
+
+enum OrderStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  OPEN
+  PAID
+  VOID
+}
+
+enum PaymentMethod {
+  CASH
+  BANK
+}
+
+enum StockMovementReason {
+  PURCHASE
+  ORDER_USAGE
+  CORRECTION
+  LOSS
+}
+
+enum ThemePreference {
+  SYSTEM
+  LIGHT
+  DARK
+}
+
+enum LoyaltyMode {
+  STAMPS
+  POINTS
+}
+
+enum LoyaltyTxType {
+  EARN
+  REDEEM
+  REVERSAL
+  ADJUSTMENT
+}
+
+enum RewardType {
+  PERCENT_DISCOUNT
+  FIXED_DISCOUNT
+  FREE_SERVICE
+}
+
+enum ResourceCategory {
+  RAW
+  INTERMEDIATE
+  FINAL
+}
+
+enum LogoVariant {
+  LOS_SANTOS
+  VICE_CITY
+  EMBLEM
+}
+
+// ───────────── Firma ─────────────
+
+model CompanySettings {
+  id           Int               @id @default(1)
+  name         String            @default("Benny's")
+  logoVariant  LogoVariant       @default(VICE_CITY)
+  phone        String?
+  radioChannel String?
+  radioPassword String?
+  statusMode   CompanyStatusMode @default(AUTO)
+  manualOpen   Boolean           @default(false)
+  minOnDuty    Int               @default(1)
+  updatedAt    DateTime          @updatedAt
+
+  @@map("company_settings")
+}
+
+// ───────────── Team ─────────────
+
+model Rank {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  level       Int          @unique
+  color       String       @default("#A1A1AA")
+  hourlyWage  Int          @default(0)
+  permissions Permission[]
+  isSystem    Boolean      @default(false)
+  employees   Employee[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("rank")
+}
+
+model Employee {
+  id                 String         @id @default(cuid())
+  userId             String         @unique
+  user               User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  serviceNumber      Int            @unique
+  phone              String?
+  rankId             String
+  rank               Rank           @relation(fields: [rankId], references: [id], onDelete: Restrict)
+  status             EmployeeStatus @default(ACTIVE)
+  mustChangePassword Boolean        @default(true)
+  hiredAt            DateTime       @default(now())
+  terminatedAt       DateTime?
+  notes              String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  timeEntries         TimeEntry[]          @relation("TimeEntryEmployee")
+  timeEntriesEdited   TimeEntry[]          @relation("TimeEntryEditedBy")
+  ordersCreated       Order[]              @relation("OrderCreatedBy")
+  ordersAssigned      Order[]              @relation("OrderAssignedTo")
+  invoicesIssued      Invoice[]
+  stockMovements      StockMovement[]
+  loyaltyTransactions LoyaltyTransaction[]
+  resourcesCreated    Resource[]
+
+  @@index([rankId])
+  @@index([status])
+  @@map("employee")
+}
+
+model UserPreference {
+  userId         String          @id
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme          ThemePreference @default(SYSTEM)
+  reducedMotion  Boolean         @default(false)
+  dashboardMusic Boolean         @default(false)
+  musicVolume    Int             @default(35)
+  updatedAt      DateTime        @updatedAt
+
+  @@map("user_preference")
+}
+
+model TimeEntry {
+  id         String    @id @default(cuid())
+  employeeId String
+  employee   Employee  @relation("TimeEntryEmployee", fields: [employeeId], references: [id], onDelete: Restrict)
+  clockIn    DateTime  @default(now())
+  clockOut   DateTime?
+  note       String?
+  editedById String?
+  editedBy   Employee? @relation("TimeEntryEditedBy", fields: [editedById], references: [id], onDelete: SetNull)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([employeeId, clockIn])
+  @@index([clockOut])
+  @@index([editedById])
+  @@map("time_entry")
+}
+
+// ───────────── Kunden & Aufträge ─────────────
+
+model Customer {
+  id                  String    @id @default(cuid())
+  number              Int       @unique @default(autoincrement())
+  name                String
+  phone               String?
+  notes               String?
+  loyaltyBalance      Int       @default(0)
+  lastVisitAt         DateTime?
+  vehicles            Vehicle[]
+  orders              Order[]
+  loyaltyTransactions LoyaltyTransaction[]
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([name])
+  @@index([phone])
+  @@map("customer")
+}
+
+model Vehicle {
+  id         String    @id @default(cuid())
+  plate      String    @unique
+  model      String
+  color      String?
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  orders     Order[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([customerId])
+  @@map("vehicle")
+}
+
+model Order {
+  id              String          @id @default(cuid())
+  number          Int             @unique @default(autoincrement())
+  type            OrderType
+  status          OrderStatus     @default(OPEN)
+  customerId      String
+  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  vehicleId       String?
+  vehicle         Vehicle?        @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  createdById     String
+  createdBy       Employee        @relation("OrderCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  assignedToId    String?
+  assignedTo      Employee?       @relation("OrderAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  discountPercent Int             @default(0)
+  subtotal        Int             @default(0)
+  loyaltyRewardId String?
+  loyaltyReward   LoyaltyReward?  @relation(fields: [loyaltyRewardId], references: [id], onDelete: SetNull)
+  loyaltyDiscount Int             @default(0)
+  total           Int             @default(0)
+  notes           String?
+  completedAt     DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  items               OrderItem[]
+  invoice             Invoice?
+  stockMovements      StockMovement[]
+  loyaltyTransactions LoyaltyTransaction[]
+
+  @@index([status, createdAt])
+  @@index([customerId])
+  @@index([vehicleId])
+  @@index([createdById])
+  @@index([assignedToId])
+  @@index([loyaltyRewardId])
+  @@map("work_order")
+}
+
+model OrderItem {
+  id              String         @id @default(cuid())
+  orderId         String
+  order           Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  priceListItemId String?
+  priceListItem   PriceListItem? @relation(fields: [priceListItemId], references: [id], onDelete: SetNull)
+  description     String
+  quantity        Int            @default(1)
+  unitPrice       Int
+
+  @@index([orderId])
+  @@index([priceListItemId])
+  @@map("order_item")
+}
+
+model Invoice {
+  id                String        @id @default(cuid())
+  number            Int           @unique @default(autoincrement())
+  orderId           String        @unique
+  order             Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  amount            Int
+  status            InvoiceStatus @default(OPEN)
+  paymentMethod     PaymentMethod?
+  issuedById        String
+  issuedBy          Employee      @relation(fields: [issuedById], references: [id], onDelete: Restrict)
+  issuedAt          DateTime      @default(now())
+  paidAt            DateTime?
+  loyaltyTransactions LoyaltyTransaction[]
+
+  @@index([status, issuedAt])
+  @@index([issuedById])
+  @@map("invoice")
+}
+
+// ───────────── Preisliste & Lager ─────────────
+
+model PriceCategory {
+  id        String          @id @default(cuid())
+  name      String          @unique
+  sortOrder Int             @default(0)
+  items     PriceListItem[]
+
+  @@map("price_category")
+}
+
+model PriceListItem {
+  id           String        @id @default(cuid())
+  name         String
+  description  String?
+  price        Int
+  categoryId   String
+  category     PriceCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  partId       String?
+  part         Part?         @relation(fields: [partId], references: [id], onDelete: SetNull)
+  partQuantity Int           @default(1)
+  active       Boolean       @default(true)
+  sortOrder    Int           @default(0)
+  orderItems   OrderItem[]
+  loyaltyRewards LoyaltyReward[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@unique([categoryId, name])
+  @@index([partId])
+  @@map("price_list_item")
+}
+
+model Part {
+  id            String          @id @default(cuid())
+  name          String          @unique
+  sku           String?         @unique
+  unit          String          @default("Stk")
+  stock         Int             @default(0)
+  minStock      Int             @default(0)
+  purchasePrice Int             @default(0)
+  movements     StockMovement[]
+  priceItems    PriceListItem[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@map("part")
+}
+
+model StockMovement {
+  id         String              @id @default(cuid())
+  partId     String
+  part       Part                @relation(fields: [partId], references: [id], onDelete: Restrict)
+  delta      Int
+  reason     StockMovementReason
+  orderId    String?
+  order      Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  employeeId String
+  employee   Employee            @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  note       String?
+  createdAt  DateTime            @default(now())
+
+  @@index([partId, createdAt])
+  @@index([orderId])
+  @@index([employeeId])
+  @@map("stock_movement")
+}
+
+// ───────────── Treuesystem ─────────────
+
+model LoyaltySettings {
+  id              Int         @id @default(1)
+  enabled         Boolean     @default(false)
+  mode            LoyaltyMode @default(STAMPS)
+  stampsPerVisit  Int         @default(1)
+  dollarsPerPoint Int         @default(100)
+  minVisitTotal   Int         @default(500)
+  cooldownHours   Int         @default(12)
+  cardSize        Int         @default(10)
+  updatedAt       DateTime    @updatedAt
+
+  @@map("loyalty_settings")
+}
+
+model LoyaltyReward {
+  id              String         @id @default(cuid())
+  name            String         @unique
+  description     String?
+  cost            Int
+  type            RewardType
+  value           Int            @default(0)
+  priceListItemId String?
+  priceListItem   PriceListItem? @relation(fields: [priceListItemId], references: [id], onDelete: SetNull)
+  active          Boolean        @default(true)
+  sortOrder       Int            @default(0)
+  orders          Order[]
+  transactions    LoyaltyTransaction[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([priceListItemId])
+  @@map("loyalty_reward")
+}
+
+model LoyaltyTransaction {
+  id           String         @id @default(cuid())
+  customerId   String
+  customer     Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  type         LoyaltyTxType
+  amount       Int
+  balanceAfter Int
+  orderId      String?
+  order        Order?         @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  invoiceId    String?
+  invoice      Invoice?       @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  rewardId     String?
+  reward       LoyaltyReward? @relation(fields: [rewardId], references: [id], onDelete: SetNull)
+  employeeId   String
+  employee     Employee       @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  note         String?
+  createdAt    DateTime       @default(now())
+
+  @@index([customerId, createdAt])
+  @@index([orderId])
+  @@index([invoiceId])
+  @@index([rewardId])
+  @@index([employeeId])
+  @@map("loyalty_transaction")
+}
+
+// ───────────── Ressourcen ─────────────
+
+model Resource {
+  id          String           @id @default(cuid())
+  name        String
+  category    ResourceCategory
+  weightGrams Int
+  exportPrice Int
+  note        String?
+  createdById String?
+  createdBy   Employee?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([category])
+  @@index([createdById])
+  @@map("resource")
+}
+
+// ───────────── Audit ─────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action    String
+  entity    String
+  entityId  String?
+  data      Json?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+  @@map("audit_log")
+}
