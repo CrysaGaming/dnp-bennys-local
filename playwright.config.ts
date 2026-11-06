@@ -16,11 +16,12 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'node scripts/with-test-db.mjs "npm run build && npm run start -- -p 3100"',
+    command: 'node scripts/with-test-db.mjs "npm run build && node scripts/e2e-server.mjs"',
     url: "http://localhost:3100/api/health",
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
     env: {
+      PORT: "3100",
       BETTER_AUTH_URL: "http://localhost:3100",
       SEED_ADMIN_USERNAME: "admin",
       SEED_ADMIN_PASSWORD: "Start-Passwort-123",
