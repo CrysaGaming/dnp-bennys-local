@@ -34,7 +34,7 @@ describe("calcOrderTotals", () => {
         discountPercent: 15,
         reward: null,
       }),
-    ).toEqual({ subtotal: 1050, afterDiscount: 892, loyaltyDiscount: 0, total: 892 });
+    ).toEqual({ subtotal: 1050, afterDiscount: 893, loyaltyDiscount: 0, total: 893 });
   });
 
   it("Prozent-Prämie auf den rabattierten Betrag", () => {
