@@ -91,10 +91,13 @@ test("ohne INVENTORY_MANAGE gibt es keine Knöpfe zum Buchen", async ({ page, br
 
   await viewer.goto("/lager");
 
+  // Erst etwas Positives prüfen – sonst gewinnt ein Count-0-Test, weil die Seite noch
+  // gar nicht gerendert ist.
+  await expect(viewer.getByRole("heading", { name: "Lager" })).toBeVisible();
+  await expect(viewer.getByRole("button", { name: "Historie" }).first()).toBeVisible();
+
   await expect(viewer.getByRole("button", { name: "Buchen" })).toHaveCount(0);
   await expect(viewer.getByRole("button", { name: "Speichern" })).toHaveCount(0);
-  // mehrere Teile in der Liste – wenigstens einer hat den Historie-Knopf
-  await expect(viewer.getByRole("button", { name: "Historie" }).first()).toBeVisible();
 
   await context.close();
 });

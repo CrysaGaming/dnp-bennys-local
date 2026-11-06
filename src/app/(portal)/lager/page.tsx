@@ -21,14 +21,16 @@ async function Content() {
         breadcrumb={[{ label: "Dashboard", href: "/dashboard" }, { label: "Lager" }]}
       />
 
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Neues Teil</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PartSheet />
-        </CardContent>
-      </Card>
+      {canManage ? (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Neues Teil</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PartSheet />
+          </CardContent>
+        </Card>
+      ) : null}
 
       <PartsTable parts={parts} canManage={canManage} />
     </>
