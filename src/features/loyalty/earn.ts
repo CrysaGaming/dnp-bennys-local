@@ -38,7 +38,8 @@ export function exampleText(s: EarnSettings, amount: number): string {
     return `Beispiel: Rechnung ${money} → keine Gutschrift (Mindestbetrag ${formatMoney(s.minVisitTotal)})`;
   }
 
-  const earned = calcEarn(s, amount, null, new Date("2026-01-01T00:00:00Z"));
+  // Das Beispiel zeigt, was bei Aktivierung pass – der aus-Schalter gehört nicht zur Rechnung.
+  const earned = s.mode === "STAMPS" ? s.stampsPerVisit : Math.floor(amount / s.dollarsPerPoint);
 
   return `Beispiel: Rechnung ${money} → +${earned} ${s.mode === "STAMPS" ? "Stempel" : "Punkte"}`;
 }

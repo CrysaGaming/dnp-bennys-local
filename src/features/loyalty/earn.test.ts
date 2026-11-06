@@ -41,4 +41,8 @@ describe("Gutschrift berechnen", () => {
       "Beispiel: Rechnung $1.200 → keine Gutschrift (Mindestbetrag $1.500)",
     );
   });
+
+  it("das Beispiel zeigt, was bei Aktivierung pass – auch wenn das System aus ist", () => {
+    expect(exampleText({ ...s, enabled: false }, 1200)).toBe("Beispiel: Rechnung $1.200 → +1 Stempel");
+  });
 });

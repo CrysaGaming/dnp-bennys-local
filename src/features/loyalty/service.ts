@@ -4,6 +4,7 @@ import { writeAudit } from "@/lib/audit";
 import { assertPermission } from "@/lib/permissions";
 import { BusinessRuleError, ConflictError, NotFoundError } from "@/lib/errors";
 import type { SessionContext } from "@/lib/session-types";
+import type { RewardRow } from "./reward-types";
 import {
   adjustSchema,
   loyaltySettingsSchema,
@@ -15,6 +16,11 @@ import { bookLoyalty } from "./ledger";
 
 const MODE_GUARD = "Modus kann nur gewechselt werden, solange kein Kunde Guthaben hat.";
 const REWARD_CONFLICT = "Diese Prämie gibt es schon";
+
+/** Für die Einstellungsseite: der Grund, warum der Modus gesperrt ist, muss sichtbar sein. */
+export async function countCustomersWithBalance(): Promise<number> {
+  return prisma.customer.count({ where: { loyaltyBalance: { gt: 0 } } });
+}
 
 /** Die Singleton-Zeile kann fehlen, wenn der Seed nicht gelaufen ist – liefern auf jeden Fall. */
 export async function getLoyaltySettings() {
@@ -48,13 +54,26 @@ export async function updateLoyaltySettings(ctx: SessionContext, input: LoyaltyS
   });
 }
 
-export async function listRewards(ctx: SessionContext, opts: { includeInactive?: boolean } = {}) {
+export async function listRewards(ctx: SessionContext, opts: { includeInactive?: boolean } = {}): Promise<RewardRow[]> {
   assertPermission(ctx, "CUSTOMERS_VIEW");
 
-  return prisma.loyaltyReward.findMany({
+  const rows = await prisma.loyaltyReward.findMany({
     where: opts.includeInactive ? undefined : { active: true },
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    include: { priceListItem: { select: { name: true } } },
   });
+
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    description: r.description,
+    type: r.type,
+    value: r.value,
+    cost: r.cost,
+    active: r.active,
+    sortOrder: r.sortOrder,
+    itemName: r.priceListItem?.name ?? null,
+  }));
 }
 
 export async function createReward(ctx: SessionContext, input: RewardInput) {

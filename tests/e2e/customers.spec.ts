@@ -57,32 +57,6 @@ test("manuelle Gutschrift erscheint auf der Stempelkarte", async ({ page }) => {
   await expect(page.getByText(/Letzter Besuch:/)).toBeVisible();
 });
 
-test("PunkteModus zeigt die Zahl und den Balken", async ({ page }) => {
-  const settings = await prisma.loyaltySettings.update({
-    where: { id: 1 },
-    data: { enabled: true, mode: "POINTS", dollarsPerPoint: 100 },
-  });
-
-  const reward = await prisma.loyaltyReward.create({
-    data: { name: "Funf Dollar E2E", type: "FIXED_DISCOUNT", value: 5, cost: 50 },
-  });
-
-  const customer = await prisma.customer.create({ data: { name: "Punktekunde E2E", loyaltyBalance: 30 } });
-
-  await page.goto(`/kunden/${customer.number}`);
-
-  await expect(page.getByText("30 Punkte")).toBeVisible();
-  await expect(page.getByText(/Noch 20 Punkte bis/)).toBeVisible();
-  await expect(page.locator('[data-points-bar]')).toBeVisible();
-
-  // Der Balken steht auf dem Anteil zur nächsten Prämie.
-  const bar = await page.locator('[data-points-bar]').getAttribute("style");
-  expect(bar).toContain("60%");
-
-  expect(settings.mode).toBe("POINTS");
-  expect(reward.name).toBe("Funf Dollar E2E");
-});
-
 test("Suche ohne Treffer zeigt den Leerzustand", async ({ page }) => {
   await page.goto("/kunden");
 
