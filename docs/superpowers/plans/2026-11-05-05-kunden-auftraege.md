@@ -262,7 +262,7 @@ expect(calcOrderTotals({ items: [], discountPercent: 0, reward: null }).total).t
   - `applyReward(ctx, orderId, rewardId): Promise<void>`, `removeReward(ctx, orderId): Promise<void>`
   - intern: `recalcOrder(tx, orderId): Promise<void>` (nach jeder Änderung)
 
-- [ ] **Step 1: Failing Tests**
+- [x] **Step 1: Failing Tests**
 
 `status.test.ts`: `canTransition("OPEN", "DONE")` true; `("DONE", "IN_PROGRESS")` false; `("CANCELLED", "OPEN")` false. `canEditOrder` mit fremdem Auftrag ohne `ORDERS_MANAGE` → false, mit → true, eigener → true.
 
@@ -282,10 +282,10 @@ expect(calcOrderTotals({ items: [], discountPercent: 0, reward: null }).total).t
 - Storno eines Auftrags mit Prämie bucht die Kosten zurück
 - Review Focus 2: Guthaben 1, dieselbe Prämie (Kosten 1) parallel in zwei offenen Aufträgen → genau eine erfolgreich, Guthaben 0
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren** – Jede Mutation läuft so: Transaktion öffnen → Auftrag laden → `canEditOrder` bzw. `assertPermission` prüfen → Status prüfen → ändern → `recalcOrder` → `writeAudit` (`order.<aktion>`).
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(auftraege): Auftrags-Service mit Lager und Prämien`
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren** – Jede Mutation läuft so: Transaktion öffnen → Auftrag laden → `canEditOrder` bzw. `assertPermission` prüfen → Status prüfen → ändern → `recalcOrder` → `writeAudit` (`order.<aktion>`).
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(auftraege): Auftrags-Service mit Lager und Prämien`
 
 ### Task 9.3: Rechnungs-Service mit Gutschrift
 
@@ -300,7 +300,7 @@ expect(calcOrderTotals({ items: [], discountPercent: 0, reward: null }).total).t
   - `voidInvoice(ctx, invoiceId: string, reason: string): Promise<void>`
   - `listInvoices(ctx, filter?: { status?: InvoiceStatus })`
 
-- [ ] **Step 1: Failing Tests** – Treue aktiv: Stempel, 1 pro Besuch, ab $500, Sperrzeit 12 h
+- [x] **Step 1: Failing Tests** – Treue aktiv: Stempel, 1 pro Besuch, ab $500, Sperrzeit 12 h
   - Rechnung für Auftrag `IN_PROGRESS` → „Rechnungen gibt es nur für abgeschlossene Aufträge.“; zweite Rechnung → „Für diesen Auftrag gibt es schon eine Rechnung.“
   - `markInvoicePaid` bei $1.200 → `{ earned: 1 }`, Guthaben 1, genau eine `EARN`-Buchung mit `invoiceId`, `lastVisitAt` gesetzt
   - $400 → `{ earned: 0 }`, keine Buchung
@@ -309,10 +309,10 @@ expect(calcOrderTotals({ items: [], discountPercent: 0, reward: null }).total).t
   - erneut bezahlen → „Rechnung ist schon bezahlt.“; parallel zweimal bezahlen → genau eine Gutschrift
   - `voidInvoice` einer bezahlten Rechnung mit Guthaben 1 → `REVERSAL` −1, Guthaben 0
   - Guthaben schon ausgegeben (0), dann `voidInvoice` → keine Buchung, Guthaben bleibt 0 (Review Focus)
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren** – Bezahlen und Gutschrift laufen in einer Transaktion. Die Gutschrift nutzt `calcEarn(settings, amount, customer.lastVisitAt, now)` und `bookLoyalty({ type: "EARN", visitAt: now })`. Bei Storno wird `min(earned, balance)` abgezogen, bei 0 gibt es keine Buchung.
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(rechnungen): Rechnungen mit Treue-Gutschrift`
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren** – Bezahlen und Gutschrift laufen in einer Transaktion. Die Gutschrift nutzt `calcEarn(settings, amount, customer.lastVisitAt, now)` und `bookLoyalty({ type: "EARN", visitAt: now })`. Bei Storno wird `min(earned, balance)` abgezogen, bei 0 gibt es keine Buchung.
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(rechnungen): Rechnungen mit Treue-Gutschrift`
 
 ### Task 9.4: Auftrags-Oberfläche
 
@@ -324,21 +324,23 @@ expect(calcOrderTotals({ items: [], discountPercent: 0, reward: null }).total).t
 - Consumes: Auftrags-, Rechnungs-, Kunden- und Preislisten-Actions, `ALLOWED_TRANSITIONS`, `formatMoney`
 - Produces: `/auftraege/neu?kunde=<nummer>&praemie=<id>`: Kunde ist vorbelegt; nach dem Anlegen wird die Prämie eingelöst, dann folgt der Wechsel auf die Detailseite
 
-- [ ] **Step 1: Failing E2E** – siehe Task 9.5 (ein gemeinsamer Ablauf-Test)
-- [ ] **Step 2: Implementieren**
+- [x] **Step 1: Failing E2E** – siehe Task 9.5 (ein gemeinsamer Ablauf-Test)
+- [x] **Step 2: Implementieren**
   - Liste mit Filtern in der URL (`status`, `typ`, `mitarbeiter`, `q`).
   - Kunden-Combobox sucht über Name, Rufnummer und Kennzeichen, mit „Neuen Kunden anlegen“ im Dialog.
   - Positionen per Combobox aus der Preisliste, gruppiert nach Kategorie.
   - Summenblock mit Zwischensumme, Rabatt, Treue-Rabatt und Gesamt.
   - Status-Buttons nur für erlaubte Übergänge. „Rechnung erstellen“ nur bei `DONE` mit `INVOICES_MANAGE` und ohne Rechnung.
-- [ ] **Step 3: Commit** – `feat(auftraege): Auftragsliste, Anlage und Detailseite`
+- [x] **Step 3: Commit** – `feat(auftraege): Auftragsliste, Anlage und Detailseite`
+  Abweichungen: cmdk filtert Einträge nach dem eigenen Wert – die Servertreffer wurden weggefiltert, darum `filter={() => 1}`. Das CommandInput hat keine Label-Zuordnung (cmdk baut sein eigenes Input), darum `aria-label`.
+  Die Suite läuft jetzt in einem Worker: zwei Specs schrieben dieselbe Singleton-Zeile des Treue-Sets parallel, ein Test verlor. Der Kundenname war doppelt (geteilte DB).
 
 ### Task 9.5: Rechnungs-Oberfläche und Gesamtablauf
 
 **Files:**
 - Create: `src/app/(portal)/rechnungen/page.tsx`, `src/features/invoices/components/invoice-table.tsx`, `src/features/invoices/components/pay-dialog.tsx`, `src/features/invoices/components/void-dialog.tsx`, `tests/e2e/order-flow.spec.ts`
 
-- [ ] **Step 1: Failing E2E** – `order-flow.spec.ts` (Admin; Factory: Treue aktiv mit Stempeln, ab $500, 10 Felder; Prämie „20 % Rabatt“ Kosten 1; Leistung „Motor-Tuning Stufe 1“ $1.200; Kunde Carlos Ramirez mit Fahrzeug „8BEN 42“)
+- [x] **Step 1: Failing E2E** – `order-flow.spec.ts` (Admin; Factory: Treue aktiv mit Stempeln, ab $500, 10 Felder; Prämie „20 % Rabatt“ Kosten 1; Leistung „Motor-Tuning Stufe 1“ $1.200; Kunde Carlos Ramirez mit Fahrzeug „8BEN 42“)
 
 ```ts
 test("Auftrag → Rechnung → bezahlt → Stempel → Einlösen", async ({ page }) => {
@@ -352,10 +354,11 @@ test("Auftrag → Rechnung → bezahlt → Stempel → Einlösen", async ({ page
 });
 ```
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren**
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren**
   - Rechnungsliste mit Statusfilter.
   - Bezahlen-Dialog (Bar oder Bank). Danach Toast „Bezahlt. +N Stempel für <Name>“, im Punkte-Modus „+N Punkte“, ohne Gutschrift nur „Bezahlt.“
   - Storno-Dialog mit Grund und Hinweis „Auftrag danach stornieren und neu anlegen.“
-- [ ] **Step 4: Ausführen** – Run: `npm run test:unit && npm run test:int && npm run test:e2e` → PASS
-- [ ] **Step 5: Commit** – `feat(rechnungen): Rechnungsseite und Gesamtablauf`
+- [x] **Step 4: Ausführen** – Run: `npm run test:unit && npm run test:int && npm run test:e2e` → PASS
+- [x] **Step 5: Commit** – `feat(rechnungen): Rechnungsseite und Gesamtablauf`
+  9.4 und 9.5 wurden in einem Commit zusammengelegt, weil der gemeinsame Ablauftest beide Seiten braucht.
