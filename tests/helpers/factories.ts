@@ -109,8 +109,21 @@ export function fakeCtx(
   };
 }
 
-export async function createCustomer(name = "Test Kunde") {
-  return prisma.customer.create({ data: { name } });
+export async function createCustomer(
+  data: { name?: string; phone?: string | null; plates?: string[] } = {},
+) {
+  const customer = await prisma.customer.create({
+    data: {
+      name: data.name ?? `Kunde ${randomUUID().slice(0, 8)}`,
+      phone: data.phone ?? null,
+    },
+  });
+
+  for (const plate of data.plates ?? []) {
+    await prisma.vehicle.create({ data: { customerId: customer.id, plate, model: "Sultan RS" } });
+  }
+
+  return customer;
 }
 
 /** Employee für einen bestehenden Rang – wenn die Rang-Zuordnung für den Test zählt. */
