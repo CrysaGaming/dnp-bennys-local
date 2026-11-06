@@ -624,3 +624,19 @@ body {
     opacity: 1;
   }
 }
+
+/* ── Header: Equalizer-Balken des Musik-Buttons (Spec 5.2) ─────────────── */
+
+.music-eq-bar {
+  transform-origin: bottom;
+  animation: music-eq 900ms ease-in-out infinite alternate;
+}
+
+@keyframes music-eq {
+  0% {
+    transform: scaleY(0.35);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}

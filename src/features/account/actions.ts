@@ -6,9 +6,12 @@ import { passwordChangeSchema } from "@/features/auth/schemas";
 import { saveAvatar } from "@/lib/storage";
 import {
   completePasswordChange,
+  getMusicPreference,
   setAvatar,
+  setMusicPreference,
   updatePreferences,
   updateProfile,
+  type MusicPreference,
   type Preferences,
   type Profile,
 } from "./service";
@@ -72,4 +75,25 @@ export async function updatePreferencesAction(input: unknown): Promise<ActionRes
     },
     { revalidate: [["/settings", "page"], ["/dashboard", "page"]] },
   );
+}
+
+/** Musik im Dashboard (Spec 6.4): die Wahl des eigenen Users, kein Recht nötig. */
+export async function setMusicPreferenceAction(
+  input: unknown,
+): Promise<ActionResult<MusicPreference>> {
+  return runAction(
+    async (ctx) => setMusicPreference(ctx, input),
+    {
+      revalidate: [
+        ["/settings", "page"],
+        ["/dashboard", "page"],
+        ["/dashboard", "layout"],
+      ],
+    },
+  );
+}
+
+/** Die Login-Szene entscheidet danach, ob der Song weiterläuft oder ausgeblendet wird. */
+export async function getMusicPreferenceAction(): Promise<ActionResult<MusicPreference>> {
+  return runAction(async (ctx) => getMusicPreference(ctx));
 }

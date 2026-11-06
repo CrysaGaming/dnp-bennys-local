@@ -6,6 +6,8 @@ import { cn } from "cn";
 import { authClient } from "@/lib/auth-client";
 import type { LogoVariant } from "@/generated/prisma/enums";
 import { useMusic } from "@/components/music/music-provider";
+import { musicAfterLogin } from "@/components/music/music-after-login";
+import { getMusicPreferenceAction } from "@/features/account/actions";
 import { LoginForm } from "./login-form";
 import { IntroSplash } from "./intro-splash";
 import { BackgroundSlideshow } from "./background-slideshow";
@@ -80,7 +82,7 @@ export function LoginScene({
       .catch(() => setName(null));
   }, [state.phase]);
 
-  function onResult(result: "success" | "error") {
+  async function onResult(result: "success" | "error") {
     if (result === "error") {
       dispatch({ type: "LOGIN_ERROR" });
       return;
@@ -88,8 +90,11 @@ export function LoginScene({
 
     dispatch({ type: "LOGIN_SUCCESS" });
 
-    // Task 3.4 entscheidet hier später. Bis dahin wird die Musik über 0,8 s ausgeblendet.
-    void music.fadeTo(0, FADE_OUT_MS);
+    // Spec 6.4: hat der User Dashboard-Musik an, läuft der Song weiter, sonst Fade-out.
+    const res = await getMusicPreferenceAction();
+    if (musicAfterLogin(res.ok ? res.data : null) === "fade-out") {
+      void music.fadeTo(0, FADE_OUT_MS);
+    }
   }
 
   return (

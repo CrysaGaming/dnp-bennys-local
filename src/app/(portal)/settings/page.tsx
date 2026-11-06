@@ -3,9 +3,10 @@ import { requireSession } from "@/lib/dal";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChangePasswordForm } from "@/features/account/components/change-password-form";
+import { MusicPreferencesForm } from "@/features/account/components/music-preferences-form";
 import { PreferencesForm } from "@/features/account/components/preferences-form";
 import { SessionList } from "@/features/account/components/session-list";
-import { getPreferences } from "@/features/account/service";
+import { getMusicPreference, getPreferences } from "@/features/account/service";
 
 type Props = { searchParams: Promise<{ pw?: string }> };
 
@@ -13,6 +14,7 @@ async function Content({ searchParams }: Props) {
   const params = await searchParams;
   const ctx = await requireSession({ allowMustChangePassword: true });
   const prefs = await getPreferences(ctx);
+  const music = await getMusicPreference(ctx);
 
   return (
     <div className="flex flex-col gap-6">
@@ -43,6 +45,15 @@ async function Content({ searchParams }: Props) {
             {ctx.name} · Rang {ctx.rank.name}
           </p>
           <PreferencesForm theme={prefs.theme} reducedMotion={prefs.reducedMotion} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-display text-lg uppercase">Musik</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <MusicPreferencesForm initial={music} />
         </CardContent>
       </Card>
 

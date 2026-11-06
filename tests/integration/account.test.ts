@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod";
 import { prisma } from "@/lib/prisma";
-import { completePasswordChange, setAvatar, updatePreferences, updateProfile } from "@/features/account/service";
+import { completePasswordChange, getMusicPreference, setAvatar, setMusicPreference, updatePreferences, updateProfile } from "@/features/account/service";
 import { makeCtx } from "@tests/helpers/factories";
 
 describe("completePasswordChange", () => {
@@ -98,5 +98,30 @@ describe("updatePreferences", () => {
 
     const row = await prisma.userPreference.findUniqueOrThrow({ where: { userId: ctx.userId } });
     expect(row).toMatchObject({ theme: "SYSTEM", reducedMotion: true });
+  });
+});
+
+describe("Musik-Einstellung", () => {
+  it("lehnt eine Lautstärke über 100 ab", async () => {
+    const ctx = await makeCtx({ username: "musik-laut" });
+
+    await expect(setMusicPreference(ctx, { dashboardMusic: true, musicVolume: 101 })).rejects.toThrow(ZodError);
+  });
+
+  it("speichert an und Lautstärke und auditiert", async () => {
+    const ctx = await makeCtx({ username: "musik" });
+
+    await setMusicPreference(ctx, { dashboardMusic: true, musicVolume: 60 });
+
+    expect(await getMusicPreference(ctx)).toEqual({ dashboardMusic: true, musicVolume: 60 });
+
+    const audit = await prisma.auditLog.findFirstOrThrow({ where: { action: "account.music_updated" } });
+    expect(audit).toMatchObject({ actorId: ctx.userId, entity: "user_preference", entityId: ctx.userId });
+  });
+
+  it("gibt die Standardwerte, wenn die Zeile fehlt", async () => {
+    const ctx = await makeCtx({ username: "musik-standard" });
+
+    expect(await getMusicPreference(ctx)).toEqual({ dashboardMusic: false, musicVolume: 35 });
   });
 });

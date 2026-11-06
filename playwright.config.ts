@@ -12,7 +12,11 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        // Autoplay bleibt blockiert – genau das prüft `dashboard-music.spec.ts` (Plan 02).
+        launchOptions: { args: ["--autoplay-policy=user-gesture-required"] },
+      },
     },
   ],
   webServer: {
