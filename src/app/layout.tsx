@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Anton, Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { optionalSession } from "@/lib/dal";
+import { getPreferences } from "@/features/account/service";
 import "./globals.css";
 
 const anton = Anton({
@@ -24,6 +27,21 @@ export const metadata: Metadata = {
   description: "Internes Mitarbeiterportal der RP-Werkstatt Benny's (DNP Roleplay).",
 };
 
+/** Theme und Bewegung des Nutzers (Spec 5.12) – die Lesung gehört in die Suspense-Grenze. */
+async function Shell({ children }: { children: React.ReactNode }) {
+  const ctx = await optionalSession();
+  const prefs = ctx ? await getPreferences(ctx) : null;
+
+  return (
+    <Providers
+      initialTheme={prefs?.theme === "SYSTEM" ? "system" : prefs?.theme.toLowerCase()}
+      reducedMotion={prefs?.reducedMotion}
+    >
+      {children}
+    </Providers>
+  );
+}
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
@@ -32,7 +50,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={`${anton.variable} ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <Providers>{children}</Providers>
+        <Suspense fallback={null}>
+          <Shell>{children}</Shell>
+        </Suspense>
       </body>
     </html>
   );

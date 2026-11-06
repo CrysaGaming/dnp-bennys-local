@@ -133,6 +133,28 @@ body {
     radial-gradient(45rem 35rem at 100% 100%, color-mix(in oklab, var(--accent-violet) 6%, transparent));
 }
 
+/* ── Bewegungen reduzieren (Spec 5.6 / 5.12) ───────────────────────────────── */
+
+[data-reduced-motion="true"] *,
+[data-reduced-motion="true"] *::before,
+[data-reduced-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ── Theme-Wechsel: Kreis-Übergang ab dem Toggle (Spec 4.3 / 5.2) ────────── */
 
 :root {
