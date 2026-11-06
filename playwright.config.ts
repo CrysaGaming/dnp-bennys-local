@@ -4,6 +4,10 @@ export default defineConfig({
   testDir: "tests/e2e",
   timeout: 30_000,
   fullyParallel: false,
+  // Die Specs teilen sich eine DB, und das Treue-Set ist eine Singleton-Zeile. Zwei Dateien, die
+  // sie schreiben, verbiegen sich sonst gegenseitig ihre Erwartung – ein Test lief parallel durch
+  // den anderen um. Darum läuft die Suite in einem Worker.
+  workers: 1,
   reporter: [["list"]],
   globalSetup: "tests/e2e/global-setup.ts",
   use: {
