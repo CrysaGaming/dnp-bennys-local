@@ -1,7 +1,14 @@
 # Bilder der Login-Seite
 
 Alle Fotos stehen unter der jeweiligen freien Lizenz der Quelle. Die Liste ist am
-2026-11-05 geprüft worden (Spec 12.1 und 12.2). Aufbereitung: 1920 × 1080, Helligkeit
+2026-11-05 geprüft worden (Spec 12.1 und 12.2) und am 2026-11-06 erneut bestätigt:
+beide Lizenzseiten gelesen, die Bildseite von Cedric Letsch ist online und ohne
+Copyright-Bemerkung. Nach der Pexels-Lizenz ist es verboten, ein Bild als Marke zu nutzen oder
+eine Markenempfehlung anzudeuten – Markenschilder im Szenenhintergrund (`bg-02` und `intro`:
+PLYMOUTH, AIMOL) sind davon nicht betroffen. Dieses Portal ist ein nicht-kommerzielles
+Hobby-Projekt einer fiktiven Werkstatt auf einem GTA-RP-Server.
+
+Aufbereitung: 1920 × 1080, Helligkeit
 −15 %, WebP. Diese Dateien werden von `scripts/prepare-login-images.mjs` erzeugt.
 
 | Datei | Motiv | Stil | Fotograf | Lizenz | Quelle |

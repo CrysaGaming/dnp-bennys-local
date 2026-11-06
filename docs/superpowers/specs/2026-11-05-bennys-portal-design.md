@@ -1582,7 +1582,7 @@ Folgen für das Projekt:
 - Als Hintergrund der Login-Seite sind alle Bilder unten zulässig.
 - **Fürs Logo kommen Stockfotos nicht in Frage.** Pexels verbietet es ausdrücklich, bei Unsplash sind Fotos dafür ohnehin ungeeignet. Logo-Lösung: 12.3.
 - Namensnennung ist nicht Pflicht. Ein kleiner Credit-Hinweis in `/login` (z. B. Tooltip „Fotos: Unsplash, Pexels“) ist trotzdem fair.
-- Bilder mit gut sichtbaren Automarken-Logos (z. B. Porsche, Nissan) habe ich bewusst aussortiert.
+- Bilder mit gut sichtbaren Automarken-Logos habe ich für **das Logo** bewusst aussortiert. In den Hintergrundfotos sind Markenschilder im Szenenhintergrund zulässig: die Pexels-Lizenz verbietet, das Bild als Marke zu nutzen oder eine Empfehlung durch abgebildete Personen oder Marken anzudeuten – ein Schild im Hintergrund ist nichts davon. Dieses Portal ist ein nicht-kommerzielles Hobby-Projekt (fiktive Werkstatt „Benny's“ auf einem GTA-RP-Server). Lizenzseiten am 2026-11-06 erneut geprüft: Unsplash ✓, Pexels ✓. `bg-02` und `intro` zeigen ein rundes „PLYMOUTH“-Schild (eine Marke) – das ist kein Verstoß, aber es ist der Grund, warum die Logo-Auswahl keine Stockfotos nimmt.
 
 ### 12.2 Hintergrundbilder
 
