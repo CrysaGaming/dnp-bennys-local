@@ -30,14 +30,36 @@ Aus der Übersicht: Punkt 2 (Prämie doppelt einlösen, Task 8.2 und 9.2) und Pu
 
 **Interfaces:**
 - Produces:
-  - `normalizePlate(input: string): string` (trimmen, Großbuchstaben, Leerzeichenfolgen → ein Leerzeichen), `plateSchema` (nach Normalisierung `^[A-Z0-9 ]{1,8}$`, Meldung „Kennzeichen: 1–8 Zeichen, nur A–Z, 0–9 und Leerzeichen“), `phoneDigits(s: string): string`, `formatCustomerNumber(n: number): string`
+  - `normalizePlate(input: string): string` (trimmen, Großbuchstaben, Leerzeichenfolgen → ein Leerzeichen), `plateSchema` (nach Normalisierung `^[A-Z0-9 ]{1,8}# Benny's Portal – Plan 05: Kunden, Treue, Aufträge, Rechnungen (Phase 8–9)
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Kundenkartei mit Fahrzeugen, Treuesystem (Stempel oder Punkte) mit Einstellungsseite und Prämien, Aufträge mit Preisberechnung, Lagerverbrauch und Prämien-Einlösung sowie Rechnungen mit automatischer Gutschrift.
+
+**Architecture:** Alle Geldbeträge rechnet nur `calcOrderTotals` aus. Alle Treue-Buchungen laufen über `bookLoyalty`, alle Bestandsänderungen über `bookStock` (Plan 04). Statuswechsel prüft eine reine Übergangstabelle. Jede Fachfunktion arbeitet in einer Prisma-Transaktion.
+
+**Tech Stack:** wie Übersicht.
+
+**Spec:** `docs/superpowers/specs/2026-11-05-bennys-portal-design.md` (Abschnitte 3.6, 5.6, 5.7, 5.10, 7.3–7.5)
+
+## Global Constraints
+
+Gelten wie in `2026-11-05-00-uebersicht.md`.
+
+## Review Focus
+
+Aus der Übersicht: Punkt 2 (Prämie doppelt einlösen, Task 8.2 und 9.2) und Punkt 4 (Kennzeichen-Normalisierung, Task 8.1). Zusätzlich: Eine Rechnung wird ungültig, nachdem der Kunde die Gutschrift schon ausgegeben hat. Erwartung: Das Konto bleibt bei 0 und wird nicht negativ (Task 9.3).
+
+---
+
+, Meldung „Kennzeichen: 1–8 Zeichen, nur A–Z, 0–9 und Leerzeichen“), `phoneDigits(s: string): string`, `formatCustomerNumber(n: number): string`
   - `customerSchema`: name 2–60, phone ≤ 20 (leer → `null`), notes ≤ 500, vehicles: bis 10 × `{ model: 1–40, plate, color: ≤ 20 | null }`
   - `type CustomerRow = { id: string; number: number; name: string; phone: string | null; plates: string[]; loyaltyBalance: number; lastVisitAt: Date | null }`
   - `searchCustomers(ctx, q: string, limit?: number): Promise<CustomerRow[]>` (`CUSTOMERS_VIEW`; leeres `q` → alle nach Name, max. 200)
   - `getCustomerByNumber(ctx, number: number)` (mit Fahrzeugen, letzten 20 Aufträgen, letzten 50 Treue-Buchungen)
   - `createCustomer(ctx, input: unknown): Promise<{ customer: Customer; warnings: string[] }>`, `updateCustomer(ctx, id, input)`, `addVehicle(ctx, customerId, v)`, `removeVehicle(ctx, vehicleId)` (mit Aufträgen: nur vom Kunden lösen, sonst löschen), `deleteCustomer(ctx, id)`; alles Schreibende mit `CUSTOMERS_EDIT`
 
-- [ ] **Step 1: Failing Tests**
+- [x] **Step 1: Failing Tests**
 
 ```ts
 // normalize.test.ts – Review Focus 4
@@ -54,10 +76,10 @@ expect(formatCustomerNumber(42)).toBe("#0042");
 - `deleteCustomer` mit Auftrag → „Kunde hat Aufträge oder Treue-Buchungen und kann nicht gelöscht werden.“; ohne → gelöscht, Audit `customer.delete`
 - ohne `CUSTOMERS_EDIT` → `ForbiddenError`
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren** – Die Telefonsuche läuft per `$queryRaw` über `regexp_replace(phone, '\D', '', 'g') LIKE '%' || $digits || '%'` und liefert IDs. Diese werden mit den Treffern aus Name und Kennzeichen (Prisma `contains`, `mode: "insensitive"`) vereinigt.
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(kunden): Kunden-Service mit Fahrzeugen und Suche`
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren** – Die Telefonsuche läuft per `$queryRaw` über `regexp_replace(phone, '\D', '', 'g') LIKE '%' || $digits || '%'` und liefert IDs. Diese werden mit den Treffern aus Name und Kennzeichen (Prisma `contains`, `mode: "insensitive"`) vereinigt.
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(kunden): Kunden-Service mit Fahrzeugen und Suche`
 
 ### Task 8.2: Treue-Kern
 
@@ -74,7 +96,7 @@ expect(formatCustomerNumber(42)).toBe("#0042");
   - `loyaltySettingsSchema` (stampsPerVisit 1–10, cardSize 4–20, dollarsPerPoint 1–100.000, minVisitTotal 0–10.000.000, cooldownHours 0–168), `rewardSchema` (name 2–40, description ≤ 200, cost 1–1000, type, value: Prozent 1–100 bzw. $ 1–10.000.000 bzw. 0, `priceListItemId` Pflicht genau bei `FREE_SERVICE` mit Meldung „Bitte eine Leistung wählen“)
   - `getLoyaltySettings(): Promise<LoyaltySettings>`, `updateLoyaltySettings(ctx, input)`, `listRewards(ctx, opts?: { includeInactive?: boolean })`, `createReward(ctx, input)`, `updateReward(ctx, id, input)`, `setRewardActive(ctx, id, active)`, `adjustLoyalty(ctx, input: { customerId: string; amount: number; note: string })`; Schreibendes mit `LOYALTY_MANAGE`
 
-- [ ] **Step 1: Failing Tests**
+- [x] **Step 1: Failing Tests**
 
 ```ts
 // earn.test.ts
@@ -106,13 +128,13 @@ expect(stampRotation(3)).toBe(stampRotation(3));
 - `adjustLoyalty(+7, "Papierkarte übertragen")` → Guthaben 7, Buchung `ADJUSTMENT` mit `balanceAfter: 7`; Notiz unter 3 Zeichen → zod-Fehler
 - Review Focus 2: Guthaben 5, zweimal parallel `bookLoyalty(REDEEM, -3)` in je eigener Transaktion → genau eine erfolgreich, Guthaben 2
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren**
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren**
   - `bookLoyalty` zieht negative Beträge per `updateMany({ where: { id, loyaltyBalance: { gte: -amount } }, data: { loyaltyBalance: { decrement: -amount } } })` ab. `count === 0` heißt `InsufficientLoyaltyError`.
   - Danach wird die Buchung mit `balanceAfter` angelegt. Bei `visitAt` wird zusätzlich `lastVisitAt` gesetzt.
   - `calcEarn`: Die Sperrzeit gilt erfüllt, wenn `now - lastVisitAt >= cooldownHours`.
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(treue): Gutschrift, Buchungsjournal und Einstellungen`
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(treue): Gutschrift, Buchungsjournal und Einstellungen`
 
 ### Task 8.3: Kunden-Oberfläche mit Stempelkarte
 
@@ -123,7 +145,7 @@ expect(stampRotation(3)).toBe(stampRotation(3));
 - Consumes: Kunden- und Treue-Actions, `stampCardView`, `stampRotation`, `formatCustomerNumber`
 - Produces: `StampCard({ balance, cardSize, nextReward }: { balance: number; cardSize: number; nextReward: { name: string; cost: number } | null })`, `PointsBar({ balance, nextReward })`
 
-- [ ] **Step 1: Failing Tests**
+- [x] **Step 1: Failing Tests**
 
 `stamp-card.test.tsx`:
 - `balance 7, cardSize 10, nextReward { "20 % Rabatt", 10 }` → 7 Elemente `[data-stamp="filled"]`, 3 `[data-stamp="empty"]`, Text „Noch 3 Stempel bis „20 % Rabatt““
@@ -144,13 +166,13 @@ test("manuelle Gutschrift erscheint auf der Stempelkarte", async ({ page }) => {
 });
 ```
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren** nach Spec 5.6 und 5.7:
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren** nach Spec 5.6 und 5.7:
   - Die neu hinzugekommenen Stempel bekommen die Animation (Scale 1.6 → 1, Drehung, 300 ms). Der zuletzt gesehene Stand liegt in `localStorage` (`bennys:stamps-seen:<kundenId>`, `try/catch`).
   - „Neuer Auftrag“ führt zu `/auftraege/neu?kunde=<nummer>`, „Einlösen“ zu `…&praemie=<id>`.
   - Warnungen aus `createCustomer` erscheinen als Hinweis-Toast.
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(kunden): Kundenkartei, Kundenkarte und Stempelkarte`
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(kunden): Kundenkartei, Kundenkarte und Stempelkarte`
 
 ### Task 8.4: Treueprämien und Treue-Einstellungen
 
@@ -160,7 +182,7 @@ test("manuelle Gutschrift erscheint auf der Stempelkarte", async ({ page }) => {
 **Interfaces:**
 - Consumes: `exampleText`, `StampCard`, `PointsBar`, Treue-Actions, `getPriceList`
 
-- [ ] **Step 1: Failing E2E**
+- [x] **Step 1: Failing E2E**
 
 ```ts
 test("Treuesystem einschalten", async ({ page }) => {
@@ -179,13 +201,13 @@ test("Prämie Gratis-Leistung anlegen", async ({ page }) => {
 });
 ```
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren** nach Spec 5.10:
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren** nach Spec 5.10:
   - Die Felder hängen vom Modus ab, die Live-Vorschau zeigt `StampCard` bzw. `PointsBar` mit Beispielguthaben.
   - Ist der Modus gesperrt, steht die Begründung daneben.
   - Ohne `LOYALTY_MANAGE` ist alles schreibgeschützt.
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(treue): Prämien- und Einstellungsseite`
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(treue): Prämien- und Einstellungsseite`
 
 ---
 
@@ -199,13 +221,13 @@ test("Prämie Gratis-Leistung anlegen", async ({ page }) => {
 **Interfaces:**
 - Produces: `calcOrderTotals(input: { items: Array<{ quantity: number; unitPrice: number; priceListItemId: string | null }>; discountPercent: number; reward: null | { type: RewardType; value: number; priceListItemId: string | null } }): { subtotal: number; afterDiscount: number; loyaltyDiscount: number; total: number }`
 
-- [ ] **Step 1: Failing Tests** (Formel aus Spec 7.5)
+- [x] **Step 1: Failing Tests** (Formel aus Spec 7.5)
 
 ```ts
 const items = [{ quantity: 2, unitPrice: 250, priceListItemId: "oel" }, { quantity: 1, unitPrice: 1000, priceListItemId: "tuning" }];
 expect(calcOrderTotals({ items, discountPercent: 0, reward: null })).toEqual({ subtotal: 1500, afterDiscount: 1500, loyaltyDiscount: 0, total: 1500 });
 expect(calcOrderTotals({ items, discountPercent: 10, reward: null }).total).toBe(1350);
-expect(calcOrderTotals({ items: [{ quantity: 1, unitPrice: 999, priceListItemId: null }], discountPercent: 15, reward: null }).afterDiscount).toBe(850);
+expect(calcOrderTotals({ items: [{ quantity: 1, unitPrice: 999, priceListItemId: null }], discountPercent: 15, reward: null }).afterDiscount).toBe(849); // Plan hatte 850 – 999 × 0,85 = 849,15.
 expect(calcOrderTotals({ items, discountPercent: 10, reward: { type: "PERCENT_DISCOUNT", value: 20, priceListItemId: null } }))
   .toEqual({ subtotal: 1500, afterDiscount: 1350, loyaltyDiscount: 270, total: 1080 });
 expect(calcOrderTotals({ items, discountPercent: 10, reward: { type: "FIXED_DISCOUNT", value: 250, priceListItemId: null } }).total).toBe(1100);
@@ -217,10 +239,10 @@ expect(calcOrderTotals({ items, discountPercent: 0, reward: { type: "FREE_SERVIC
 expect(calcOrderTotals({ items: [], discountPercent: 0, reward: null }).total).toBe(0);
 ```
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren**
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(auftraege): Preisberechnung`
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren**
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(auftraege): Preisberechnung`
 
 ### Task 9.2: Auftrags-Service
 
@@ -240,7 +262,7 @@ expect(calcOrderTotals({ items: [], discountPercent: 0, reward: null }).total).t
   - `applyReward(ctx, orderId, rewardId): Promise<void>`, `removeReward(ctx, orderId): Promise<void>`
   - intern: `recalcOrder(tx, orderId): Promise<void>` (nach jeder Änderung)
 
-- [ ] **Step 1: Failing Tests**
+- [x] **Step 1: Failing Tests**
 
 `status.test.ts`: `canTransition("OPEN", "DONE")` true; `("DONE", "IN_PROGRESS")` false; `("CANCELLED", "OPEN")` false. `canEditOrder` mit fremdem Auftrag ohne `ORDERS_MANAGE` → false, mit → true, eigener → true.
 
@@ -260,10 +282,10 @@ expect(calcOrderTotals({ items: [], discountPercent: 0, reward: null }).total).t
 - Storno eines Auftrags mit Prämie bucht die Kosten zurück
 - Review Focus 2: Guthaben 1, dieselbe Prämie (Kosten 1) parallel in zwei offenen Aufträgen → genau eine erfolgreich, Guthaben 0
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren** – Jede Mutation läuft so: Transaktion öffnen → Auftrag laden → `canEditOrder` bzw. `assertPermission` prüfen → Status prüfen → ändern → `recalcOrder` → `writeAudit` (`order.<aktion>`).
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(auftraege): Auftrags-Service mit Lager und Prämien`
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren** – Jede Mutation läuft so: Transaktion öffnen → Auftrag laden → `canEditOrder` bzw. `assertPermission` prüfen → Status prüfen → ändern → `recalcOrder` → `writeAudit` (`order.<aktion>`).
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(auftraege): Auftrags-Service mit Lager und Prämien`
 
 ### Task 9.3: Rechnungs-Service mit Gutschrift
 
@@ -278,7 +300,7 @@ expect(calcOrderTotals({ items: [], discountPercent: 0, reward: null }).total).t
   - `voidInvoice(ctx, invoiceId: string, reason: string): Promise<void>`
   - `listInvoices(ctx, filter?: { status?: InvoiceStatus })`
 
-- [ ] **Step 1: Failing Tests** – Treue aktiv: Stempel, 1 pro Besuch, ab $500, Sperrzeit 12 h
+- [x] **Step 1: Failing Tests** – Treue aktiv: Stempel, 1 pro Besuch, ab $500, Sperrzeit 12 h
   - Rechnung für Auftrag `IN_PROGRESS` → „Rechnungen gibt es nur für abgeschlossene Aufträge.“; zweite Rechnung → „Für diesen Auftrag gibt es schon eine Rechnung.“
   - `markInvoicePaid` bei $1.200 → `{ earned: 1 }`, Guthaben 1, genau eine `EARN`-Buchung mit `invoiceId`, `lastVisitAt` gesetzt
   - $400 → `{ earned: 0 }`, keine Buchung
@@ -287,10 +309,10 @@ expect(calcOrderTotals({ items: [], discountPercent: 0, reward: null }).total).t
   - erneut bezahlen → „Rechnung ist schon bezahlt.“; parallel zweimal bezahlen → genau eine Gutschrift
   - `voidInvoice` einer bezahlten Rechnung mit Guthaben 1 → `REVERSAL` −1, Guthaben 0
   - Guthaben schon ausgegeben (0), dann `voidInvoice` → keine Buchung, Guthaben bleibt 0 (Review Focus)
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren** – Bezahlen und Gutschrift laufen in einer Transaktion. Die Gutschrift nutzt `calcEarn(settings, amount, customer.lastVisitAt, now)` und `bookLoyalty({ type: "EARN", visitAt: now })`. Bei Storno wird `min(earned, balance)` abgezogen, bei 0 gibt es keine Buchung.
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(rechnungen): Rechnungen mit Treue-Gutschrift`
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren** – Bezahlen und Gutschrift laufen in einer Transaktion. Die Gutschrift nutzt `calcEarn(settings, amount, customer.lastVisitAt, now)` und `bookLoyalty({ type: "EARN", visitAt: now })`. Bei Storno wird `min(earned, balance)` abgezogen, bei 0 gibt es keine Buchung.
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(rechnungen): Rechnungen mit Treue-Gutschrift`
 
 ### Task 9.4: Auftrags-Oberfläche
 
@@ -302,21 +324,23 @@ expect(calcOrderTotals({ items: [], discountPercent: 0, reward: null }).total).t
 - Consumes: Auftrags-, Rechnungs-, Kunden- und Preislisten-Actions, `ALLOWED_TRANSITIONS`, `formatMoney`
 - Produces: `/auftraege/neu?kunde=<nummer>&praemie=<id>`: Kunde ist vorbelegt; nach dem Anlegen wird die Prämie eingelöst, dann folgt der Wechsel auf die Detailseite
 
-- [ ] **Step 1: Failing E2E** – siehe Task 9.5 (ein gemeinsamer Ablauf-Test)
-- [ ] **Step 2: Implementieren**
+- [x] **Step 1: Failing E2E** – siehe Task 9.5 (ein gemeinsamer Ablauf-Test)
+- [x] **Step 2: Implementieren**
   - Liste mit Filtern in der URL (`status`, `typ`, `mitarbeiter`, `q`).
   - Kunden-Combobox sucht über Name, Rufnummer und Kennzeichen, mit „Neuen Kunden anlegen“ im Dialog.
   - Positionen per Combobox aus der Preisliste, gruppiert nach Kategorie.
   - Summenblock mit Zwischensumme, Rabatt, Treue-Rabatt und Gesamt.
   - Status-Buttons nur für erlaubte Übergänge. „Rechnung erstellen“ nur bei `DONE` mit `INVOICES_MANAGE` und ohne Rechnung.
-- [ ] **Step 3: Commit** – `feat(auftraege): Auftragsliste, Anlage und Detailseite`
+- [x] **Step 3: Commit** – `feat(auftraege): Auftragsliste, Anlage und Detailseite`
+  Abweichungen: cmdk filtert Einträge nach dem eigenen Wert – die Servertreffer wurden weggefiltert, darum `filter={() => 1}`. Das CommandInput hat keine Label-Zuordnung (cmdk baut sein eigenes Input), darum `aria-label`.
+  Die Suite läuft jetzt in einem Worker: zwei Specs schrieben dieselbe Singleton-Zeile des Treue-Sets parallel, ein Test verlor. Der Kundenname war doppelt (geteilte DB).
 
 ### Task 9.5: Rechnungs-Oberfläche und Gesamtablauf
 
 **Files:**
 - Create: `src/app/(portal)/rechnungen/page.tsx`, `src/features/invoices/components/invoice-table.tsx`, `src/features/invoices/components/pay-dialog.tsx`, `src/features/invoices/components/void-dialog.tsx`, `tests/e2e/order-flow.spec.ts`
 
-- [ ] **Step 1: Failing E2E** – `order-flow.spec.ts` (Admin; Factory: Treue aktiv mit Stempeln, ab $500, 10 Felder; Prämie „20 % Rabatt“ Kosten 1; Leistung „Motor-Tuning Stufe 1“ $1.200; Kunde Carlos Ramirez mit Fahrzeug „8BEN 42“)
+- [x] **Step 1: Failing E2E** – `order-flow.spec.ts` (Admin; Factory: Treue aktiv mit Stempeln, ab $500, 10 Felder; Prämie „20 % Rabatt“ Kosten 1; Leistung „Motor-Tuning Stufe 1“ $1.200; Kunde Carlos Ramirez mit Fahrzeug „8BEN 42“)
 
 ```ts
 test("Auftrag → Rechnung → bezahlt → Stempel → Einlösen", async ({ page }) => {
@@ -330,10 +354,11 @@ test("Auftrag → Rechnung → bezahlt → Stempel → Einlösen", async ({ page
 });
 ```
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren**
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren**
   - Rechnungsliste mit Statusfilter.
   - Bezahlen-Dialog (Bar oder Bank). Danach Toast „Bezahlt. +N Stempel für <Name>“, im Punkte-Modus „+N Punkte“, ohne Gutschrift nur „Bezahlt.“
   - Storno-Dialog mit Grund und Hinweis „Auftrag danach stornieren und neu anlegen.“
-- [ ] **Step 4: Ausführen** – Run: `npm run test:unit && npm run test:int && npm run test:e2e` → PASS
-- [ ] **Step 5: Commit** – `feat(rechnungen): Rechnungsseite und Gesamtablauf`
+- [x] **Step 4: Ausführen** – Run: `npm run test:unit && npm run test:int && npm run test:e2e` → PASS
+- [x] **Step 5: Commit** – `feat(rechnungen): Rechnungsseite und Gesamtablauf`
+  9.4 und 9.5 wurden in einem Commit zusammengelegt, weil der gemeinsame Ablauftest beide Seiten braucht.
