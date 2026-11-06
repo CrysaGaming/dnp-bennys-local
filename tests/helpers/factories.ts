@@ -36,7 +36,8 @@ export async function createUserWithEmployee(
 
   const rank = await createRank({
     name: isAdmin ? "Admin" : `Rang ${randomUUID().slice(0, 8)}`,
-    level: isAdmin ? 100 : (opts.level ?? 10),
+    // Level ist unique (CHECK 1–100) – mehrere Ränge in einem Test brauchen eigene Levels.
+    level: isAdmin ? 100 : (opts.level ?? 10 + (await prisma.rank.count())),
     permissions: opts.permissions ?? [],
     ...(isAdmin ? { isSystem: true } : {}),
   });
@@ -95,6 +96,16 @@ export async function makeCtx(
       isSystem: rank.isSystem,
     },
     permissions: withImplied(rank.permissions),
+  };
+}
+
+/** Reiner Unit-Kontext ohne DB (Plan Task 2.5). */
+export function fakeCtx(
+  opts: Partial<Pick<SessionContext, "isAdmin" | "permissions">> = {},
+): Pick<SessionContext, "isAdmin" | "permissions"> {
+  return {
+    isAdmin: opts.isAdmin ?? false,
+    permissions: opts.permissions ?? [],
   };
 }
 

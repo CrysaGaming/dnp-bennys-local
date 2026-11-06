@@ -55,6 +55,11 @@ export function startRoute(ctx: SessionContext): string {
   return ctx.mustChangePassword ? "/settings?pw=1" : "/dashboard";
 }
 
+/** Für die Shell: Theme und Bewegung kommen aus der Session, ohne umzuleiten. */
+export async function optionalSession(): Promise<SessionContext | null> {
+  return loadContext();
+}
+
 export async function requireSession(opts: { allowMustChangePassword?: boolean } = {}): Promise<SessionContext> {
   const ctx = await loadContext();
 

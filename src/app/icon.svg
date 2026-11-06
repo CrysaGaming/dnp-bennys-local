@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Benny's Emblem">
+<title>Benny's Emblem</title>
+<defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF2E88"/><stop offset="1" stop-color="#FF8A3D"/></linearGradient></defs>
+
+<polygon points="128,16 224.99,72 224.99,184 128,240 31.01,184 31.01,72" fill="#12121A" stroke="url(#g3)" stroke-width="10" stroke-linejoin="round"/>
+<g transform="translate(41.6 41.6) scale(7.2)" fill="none" stroke="#FFFFFF" stroke-opacity="0.09" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/></g>
+<path d="M40.65 0L5.71 0L5.71-128.91L40.65-128.91Q54.71-128.91 61.12-122.06Q67.53-115.21 67.53-99.46L67.53-99.46L67.53-93.82Q67.53-84.74 64.27-79.10Q61.01-73.46 54.35-71.70L54.35-71.70Q63.06-69.51 66.03-61.41Q68.99-53.32 68.99-41.67L68.99-41.67Q68.99-29.15 66.65-19.78Q64.31-10.40 58.15-5.20Q52.00 0 40.65 0L40.65 0ZM30.91-108.98L30.91-80.35L36.18-80.35Q39.77-80.35 40.80-83.13Q41.82-85.91 41.82-89.79L41.82-89.79L41.82-102.76Q41.82-108.98 36.33-108.98L36.33-108.98L30.91-108.98ZM33.47-22.71L33.47-22.71Q43.51-22.71 43.51-32.23L43.51-32.23L43.51-48.34Q43.51-53.83 41.86-57.02Q40.21-60.21 35.67-60.21L35.67-60.21L30.91-60.21L30.91-22.85Q32.52-22.71 33.47-22.71Z" transform="translate(90.65 188.45)" fill="url(#g3)" stroke="#0B0B10" stroke-width="6" stroke-linejoin="round" paint-order="stroke"/>
+</svg>

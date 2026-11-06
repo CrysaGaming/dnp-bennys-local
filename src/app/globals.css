@@ -2,7 +2,10 @@
 
 /* ── Design-Tokens (Spec 4.2), in OKLCH umgerechnet ───────────────────── */
 
-:root {
+/* `.light` erzwingt die hellen Tokens in einem Teilbaum – für die Logo-Karten und
+   die Vorschau (Spec 5.11), die immer beide Seiten zeigen. */
+:root,
+.light {
   --background: oklch(0.9798 0.0045 78.3); /* #FAF8F5 */
   --foreground: oklch(0.2103 0.0059 285.9); /* #18181B */
   --card: oklch(1 0 0); /* #FFFFFF */
@@ -125,6 +128,60 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ── Portal-Shell: zwei schwache Radial-Glows, nur im Dark Mode (Spec 4.3) ── */
+
+.dark .portal-shell {
+  background-image:
+    radial-gradient(60rem 40rem at 12% 0%, color-mix(in oklab, var(--primary) 6%, transparent)),
+    radial-gradient(45rem 35rem at 100% 100%, color-mix(in oklab, var(--accent-violet) 6%, transparent));
+}
+
+/* ── Bewegungen reduzieren (Spec 5.6 / 5.12) ───────────────────────────────── */
+
+[data-reduced-motion="true"] *,
+[data-reduced-motion="true"] *::before,
+[data-reduced-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Theme-Wechsel: Kreis-Übergang ab dem Toggle (Spec 4.3 / 5.2) ────────── */
+
+:root {
+  --vt-x: 50vw;
+  --vt-y: 50vh;
+}
+
+::view-transition-old(root) {
+  animation: none;
+}
+
+::view-transition-new(root) {
+  animation: vt-circle 400ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@keyframes vt-circle {
+  from {
+    clip-path: circle(0 at var(--vt-x) var(--vt-y));
+  }
+  to {
+    clip-path: circle(150% at var(--vt-x) var(--vt-y));
+  }
+}
+
 /* Reduced Motion (Spec 4.3): nur noch Opacity-Fades. */
 [data-reduced-motion="true"] *,
 [data-reduced-motion="true"] *::before,
@@ -136,6 +193,11 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+
   *,
   *::before,
   *::after {
