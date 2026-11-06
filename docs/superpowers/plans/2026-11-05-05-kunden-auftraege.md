@@ -221,13 +221,13 @@ test("Prämie Gratis-Leistung anlegen", async ({ page }) => {
 **Interfaces:**
 - Produces: `calcOrderTotals(input: { items: Array<{ quantity: number; unitPrice: number; priceListItemId: string | null }>; discountPercent: number; reward: null | { type: RewardType; value: number; priceListItemId: string | null } }): { subtotal: number; afterDiscount: number; loyaltyDiscount: number; total: number }`
 
-- [ ] **Step 1: Failing Tests** (Formel aus Spec 7.5)
+- [x] **Step 1: Failing Tests** (Formel aus Spec 7.5)
 
 ```ts
 const items = [{ quantity: 2, unitPrice: 250, priceListItemId: "oel" }, { quantity: 1, unitPrice: 1000, priceListItemId: "tuning" }];
 expect(calcOrderTotals({ items, discountPercent: 0, reward: null })).toEqual({ subtotal: 1500, afterDiscount: 1500, loyaltyDiscount: 0, total: 1500 });
 expect(calcOrderTotals({ items, discountPercent: 10, reward: null }).total).toBe(1350);
-expect(calcOrderTotals({ items: [{ quantity: 1, unitPrice: 999, priceListItemId: null }], discountPercent: 15, reward: null }).afterDiscount).toBe(850);
+expect(calcOrderTotals({ items: [{ quantity: 1, unitPrice: 999, priceListItemId: null }], discountPercent: 15, reward: null }).afterDiscount).toBe(849); // Plan hatte 850 – 999 × 0,85 = 849,15.
 expect(calcOrderTotals({ items, discountPercent: 10, reward: { type: "PERCENT_DISCOUNT", value: 20, priceListItemId: null } }))
   .toEqual({ subtotal: 1500, afterDiscount: 1350, loyaltyDiscount: 270, total: 1080 });
 expect(calcOrderTotals({ items, discountPercent: 10, reward: { type: "FIXED_DISCOUNT", value: 250, priceListItemId: null } }).total).toBe(1100);
@@ -239,10 +239,10 @@ expect(calcOrderTotals({ items, discountPercent: 0, reward: { type: "FREE_SERVIC
 expect(calcOrderTotals({ items: [], discountPercent: 0, reward: null }).total).toBe(0);
 ```
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren**
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(auftraege): Preisberechnung`
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren**
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(auftraege): Preisberechnung`
 
 ### Task 9.2: Auftrags-Service
 
