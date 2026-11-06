@@ -29,6 +29,8 @@ function storageState(setCookie: string): unknown {
         value,
         domain: "localhost",
         path: "/",
+        // Playwright will für den Storage-State eine Zahl; -1 heißt „Session-Cookie“.
+        expires: -1,
         httpOnly: rest.some((s) => s.trim().toLowerCase() === "httponly"),
         secure: rest.some((s) => s.trim().toLowerCase() === "secure"),
         sameSite: "Lax",
