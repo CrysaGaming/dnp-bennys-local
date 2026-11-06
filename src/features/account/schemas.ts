@@ -23,3 +23,15 @@ export const avatarSchema = z.object({
 
 export type ProfileInput = z.infer<typeof profileSchema>;
 export type PreferencesInput = z.infer<typeof preferencesSchema>;
+
+/** Musik im Dashboard (Spec 6.4): Lautstärke als ganze Zahl 0–100. */
+export const musicPreferenceSchema = z.object({
+  dashboardMusic: z.boolean(),
+  musicVolume: z
+    .number()
+    .int("Die Lautstärke ist eine ganze Zahl.")
+    .min(0, "Mindestens 0.")
+    .max(100, "Höchstens 100."),
+});
+
+export type MusicPreferenceInput = z.infer<typeof musicPreferenceSchema>;

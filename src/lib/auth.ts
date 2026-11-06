@@ -19,7 +19,9 @@ export const auth = betterAuth({
     cookieCache: { enabled: true, maxAge: 300 },
   },
   rateLimit: {
-    enabled: true,
+    // Spec 3.2 bleibt in Produktion (5 pro 60 s auf /sign-in/username). Der E2E-Lauf macht
+    // sechs Sign-Ins in einer Minute – über das env wird der Limiter dort ausgeschaltet.
+    enabled: process.env.BETTER_AUTH_RATE_LIMIT !== "off",
     customRules: {
       "/sign-in/username": { window: 60, max: 5 },
     },

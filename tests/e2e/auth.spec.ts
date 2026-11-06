@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { E2E_ADMIN_PASSWORD } from "./global-setup";
-import { loginAs } from "./helpers/login";
+import { loginAs, startScene } from "./helpers/login";
 import { createLoginUser, prisma } from "./helpers/db";
 
 // Die DB wird einmal in global-setup geleert und geseedet – pro Test nur neue
@@ -68,5 +68,7 @@ test("veraltetes Cookie erzeugt keine Schleife", async ({ page, context }) => {
 
   await page.goto("/dashboard");
   await expect(page).toHaveURL(/\/login$/);
-  await expect(page.getByRole("button", { name: "Einloggen" })).toBeVisible();
+
+  // Das Intro (Phase 3) ist der erste Schirm – danach steht das Formular.
+  await startScene(page);
 });

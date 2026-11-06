@@ -3,7 +3,7 @@ import { writeAudit } from "@/lib/audit";
 import { ThemePreference } from "@/generated/prisma/enums";
 
 import type { SessionContext } from "@/lib/session-types";
-import { avatarSchema, preferencesSchema, profileSchema } from "./schemas";
+import { avatarSchema, musicPreferenceSchema, preferencesSchema, profileSchema } from "./schemas";
 
 /**
  * Nach dem eigentlichen Passwortwechsel über Better Auth (Spec 3.2):
@@ -27,6 +27,10 @@ export async function completePasswordChange(ctx: SessionContext): Promise<void>
 
 export type Profile = { name: string; phone: string | null };
 export type Preferences = { theme: ThemePreference; reducedMotion: boolean };
+export type MusicPreference = { dashboardMusic: boolean; musicVolume: number };
+
+/** Standard ohne Zeile: aus, 35 % (Spec 6.4). */
+const DEFAULT_MUSIC: MusicPreference = { dashboardMusic: false, musicVolume: 35 };
 
 /** Jemand sieht nur sein eigenes Profil – ein Recht ist dafür nicht nötig (Spec 5.12). */
 export async function getProfile(ctx: SessionContext): Promise<Profile> {
@@ -109,5 +113,39 @@ export async function updatePreferences(
     });
 
     return { theme: row.theme, reducedMotion: row.reducedMotion };
+  });
+}
+
+/** Die Musik-Einstellung gilt pro User (Spec 6.4). Lesen ohne Schreiben. */
+export async function getMusicPreference(ctx: SessionContext): Promise<MusicPreference> {
+  const row = await prisma.userPreference.findUnique({ where: { userId: ctx.userId } });
+
+  return row
+    ? { dashboardMusic: row.dashboardMusic, musicVolume: row.musicVolume }
+    : DEFAULT_MUSIC;
+}
+
+export async function setMusicPreference(
+  ctx: SessionContext,
+  input: unknown,
+): Promise<MusicPreference> {
+  const data = musicPreferenceSchema.parse(input);
+
+  return prisma.$transaction(async (tx) => {
+    const row = await tx.userPreference.upsert({
+      where: { userId: ctx.userId },
+      create: { userId: ctx.userId, dashboardMusic: data.dashboardMusic, musicVolume: data.musicVolume },
+      update: { dashboardMusic: data.dashboardMusic, musicVolume: data.musicVolume },
+    });
+
+    await writeAudit(tx, {
+      actorId: ctx.userId,
+      action: "account.music_updated",
+      entity: "user_preference",
+      entityId: ctx.userId,
+      data: { dashboardMusic: data.dashboardMusic, musicVolume: data.musicVolume },
+    });
+
+    return { dashboardMusic: row.dashboardMusic, musicVolume: row.musicVolume };
   });
 }
