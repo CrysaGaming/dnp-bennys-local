@@ -125,6 +125,30 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ── Theme-Wechsel: Kreis-Übergang ab dem Toggle (Spec 4.3 / 5.2) ────────── */
+
+:root {
+  --vt-x: 50vw;
+  --vt-y: 50vh;
+}
+
+::view-transition-old(root) {
+  animation: none;
+}
+
+::view-transition-new(root) {
+  animation: vt-circle 400ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@keyframes vt-circle {
+  from {
+    clip-path: circle(0 at var(--vt-x) var(--vt-y));
+  }
+  to {
+    clip-path: circle(150% at var(--vt-x) var(--vt-y));
+  }
+}
+
 /* Reduced Motion (Spec 4.3): nur noch Opacity-Fades. */
 [data-reduced-motion="true"] *,
 [data-reduced-motion="true"] *::before,
@@ -136,6 +160,11 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+
   *,
   *::before,
   *::after {
