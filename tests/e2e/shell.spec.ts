@@ -34,6 +34,15 @@ test.describe("Portal-Shell", () => {
     expect(sidebarBox?.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height);
   });
 
+  test("Sidebar zeigt kein Logo und keinen Firmennamen", async ({ page }) => {
+    await page.goto("/dashboard");
+
+    const sidebar = page.locator('[data-slot="sidebar"]');
+
+    await expect(sidebar.locator('[data-slot="sidebar-header"]')).toHaveCount(0);
+    await expect(sidebar).not.toContainText("Benny's");
+  });
+
   test("Theme-Umschalter", async ({ page }) => {
     // next-themes liest den Wert vor dem ersten Render – so ist der Startzustand klar.
     await page.addInitScript(() => window.localStorage.setItem("theme", "dark"));

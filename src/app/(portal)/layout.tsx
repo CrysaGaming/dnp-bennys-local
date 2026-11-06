@@ -44,7 +44,6 @@ async function Shell({ children }: { children: React.ReactNode }) {
         <div className="flex w-full flex-1">
           <AppSidebar
             groups={visibleNav(NAV_GROUPS, ctx)}
-            companyName={settings.name}
             footer={<ClockCard openSince={openEntry?.clockIn ?? null} />}
           />
 
