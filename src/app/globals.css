@@ -125,6 +125,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ── Portal-Shell: zwei schwache Radial-Glows, nur im Dark Mode (Spec 4.3) ── */
+
+.dark .portal-shell {
+  background-image:
+    radial-gradient(60rem 40rem at 12% 0%, color-mix(in oklab, var(--primary) 6%, transparent)),
+    radial-gradient(45rem 35rem at 100% 100%, color-mix(in oklab, var(--accent-violet) 6%, transparent));
+}
+
 /* ── Theme-Wechsel: Kreis-Übergang ab dem Toggle (Spec 4.3 / 5.2) ────────── */
 
 :root {

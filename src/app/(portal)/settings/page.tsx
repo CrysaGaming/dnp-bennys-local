@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { requireSession } from "@/lib/dal";
 import { ChangePasswordForm } from "@/features/account/components/change-password-form";
+import { PageHeader } from "@/components/layout/page-header";
 
 type Props = { searchParams: Promise<{ pw?: string }> };
 
@@ -10,7 +11,10 @@ async function Content({ searchParams }: Props) {
 
   return (
     <div className="mx-auto max-w-md">
-      <h1 className="font-display text-2xl uppercase">Einstellungen</h1>
+      <PageHeader
+        title="Einstellungen"
+        breadcrumb={[{ label: "Dashboard", href: "/dashboard" }, { label: "Einstellungen" }]}
+      />
 
       {params.pw === "1" ? (
         <p className="mt-4 text-primary-ink">Bitte vergib ein neues Passwort.</p>

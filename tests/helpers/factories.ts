@@ -99,6 +99,16 @@ export async function makeCtx(
   };
 }
 
+/** Reiner Unit-Kontext ohne DB (Plan Task 2.5). */
+export function fakeCtx(
+  opts: Partial<Pick<SessionContext, "isAdmin" | "permissions">> = {},
+): Pick<SessionContext, "isAdmin" | "permissions"> {
+  return {
+    isAdmin: opts.isAdmin ?? false,
+    permissions: opts.permissions ?? [],
+  };
+}
+
 export async function createCustomer(name = "Test Kunde") {
   return prisma.customer.create({ data: { name } });
 }

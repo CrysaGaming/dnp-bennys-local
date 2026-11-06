@@ -51,6 +51,9 @@ test.describe("mit Admin-Session", () => {
 
   test("Logout führt zu /login", async ({ page }) => {
     await page.goto("/dashboard");
+
+    // Das User-Menü im Header aufmachen (Spec 5.2), dann Logout.
+    await page.getByRole("button", { name: /Admin/ }).click();
     await page.getByRole("button", { name: "Logout" }).click();
     await expect(page).toHaveURL(/\/login$/);
   });

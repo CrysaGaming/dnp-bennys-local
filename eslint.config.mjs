@@ -6,6 +6,14 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   // Override default ignores of eslint-config-next.
+  // Von shadcn generierte Dateien (AGENTS.md: nicht von Hand umbauen) –
+  // dort darf das Initialisieren im Effect bleiben.
+  {
+    files: ["src/components/ui/**", "src/hooks/**"],
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",

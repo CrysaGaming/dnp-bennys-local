@@ -5,6 +5,7 @@ import type { CompanyStatus } from "@/lib/company-status";
 import type { SessionContext } from "@/lib/session-types";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Popover,
   PopoverContent,
@@ -37,6 +38,11 @@ export function AppHeader({ ctx, settings, status, actions }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 bg-background/70 px-4 backdrop-blur-xl sm:px-6">
       <div className="flex items-center gap-4">
+        {/* Auf dem Handy ist links der Burger für die Sidebar (Spec 5.2). */}
+        <span className="flex md:hidden">
+          <SidebarTrigger aria-label="Sidebar öffnen" />
+        </span>
+
         {/* Unter 768 px ist V1/V2 zu breit – dort steht immer das Emblem. */}
         <span className="md:hidden">
           <BrandLogo variant="EMBLEM" layout="compact" companyName={settings.name} />
