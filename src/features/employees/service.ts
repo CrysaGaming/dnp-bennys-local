@@ -6,6 +6,7 @@ import { internalEmail } from "@/lib/auth-email";
 import { writeAudit } from "@/lib/audit";
 import { assertPermission, outranks } from "@/lib/permissions";
 import { BusinessRuleError, ConflictError, NotFoundError } from "@/lib/errors";
+import { sumMinutes, weekStartBerlin } from "@/features/time/calc";
 import { EmployeeStatus } from "@/generated/prisma/enums";
 import type { SessionContext } from "@/lib/session-types";
 import { employeeCreateSchema, employeeUpdateSchema } from "./schemas";
@@ -18,8 +19,10 @@ export type EmployeeRow = {
   serviceNumber: number;
   phone: string | null;
   status: EmployeeStatus;
-  rank: { id: string; name: string; color: string; level: number };
+  rank: { id: string; name: string; color: string; level: number; hourlyWage: number };
   image: string | null;
+  /** Minuten dieser Woche in Berlin – für die Liste (Spec 5.6). */
+  minutesThisWeek: number;
 };
 
 /** Unique-Fehler (P2002) den Feldern zuordnen – Prisma 7 nennt den Index der Meldung. */
@@ -67,20 +70,33 @@ export async function listEmployees(
 
   const employees = await prisma.employee.findMany({
     where: { rankId: filter.rankId, status: filter.status },
-    include: { user: true, rank: true },
+    include: { user: true, rank: true, timeEntries: true },
     orderBy: { serviceNumber: "asc" },
   });
 
+  const weekStart = weekStartBerlin(new Date());
+  const now = new Date();
+
   return employees.map((e) => ({
     id: e.id,
-    // Der Name steht am User, der Employee hat kein eigenes name-Feld (Spec 7.3).
+    // Der Name steht am User, die Stunden kommen aus der Stempeluhr (Spec 7.3 / 5.6).
     name: e.user.name,
     username: e.user.username ?? "",
     serviceNumber: e.serviceNumber,
     phone: e.phone,
     status: e.status,
-    rank: { id: e.rank.id, name: e.rank.name, color: e.rank.color, level: e.rank.level },
+    rank: {
+      id: e.rank.id,
+      name: e.rank.name,
+      color: e.rank.color,
+      level: e.rank.level,
+      hourlyWage: e.rank.hourlyWage,
+    },
     image: e.user.image,
+    minutesThisWeek: sumMinutes(
+      e.timeEntries.filter((entry) => entry.clockIn >= weekStart),
+      now,
+    ),
   }));
 }
 

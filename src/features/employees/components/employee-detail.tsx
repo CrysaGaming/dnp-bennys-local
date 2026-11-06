@@ -15,8 +15,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { EmployeeForm } from "./employee-form";
-import { resetEmployeePasswordAction, terminateEmployeeAction } from "../actions";
 import { StartPasswordDialog } from "./start-password-dialog";
+import { resetEmployeePasswordAction, terminateEmployeeAction } from "../actions";
 import type { EmployeeRow } from "../service";
 import type { RankChoice } from "./employee-form";
 
@@ -31,11 +31,12 @@ export function EmployeeDetail({
   canTerminate: boolean;
 }) {
   const router = useRouter();
+  const [lockOpen, setLockOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [password, setPassword] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function terminate() {
+  async function lock() {
     setBusy(true);
     const res = await terminateEmployeeAction(employee.id, reason.trim() || null);
     setBusy(false);
@@ -46,6 +47,7 @@ export function EmployeeDetail({
     }
 
     toast("Mitarbeiter gesperrt.");
+    setLockOpen(false);
     router.refresh();
   }
 
@@ -67,19 +69,47 @@ export function EmployeeDetail({
       <EmployeeForm employee={employee} ranks={ranks} />
 
       {canTerminate ? (
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="reason">Grund für die Sperre</Label>
-          <Textarea id="reason" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} />
-
-          <div className="flex gap-2">
-            <Button type="button" variant="destructive" disabled={busy} onClick={terminate}>
-              Sperren
-            </Button>
-            <Button type="button" variant="outline" disabled={busy} onClick={reset}>
-              Passwort zurücksetzen
-            </Button>
-          </div>
+        <div className="flex gap-2">
+          <Button type="button" variant="destructive" onClick={() => setLockOpen(true)}>
+            Sperren
+          </Button>
+          <Button type="button" variant="outline" disabled={busy} onClick={reset}>
+            Passwort zurücksetzen
+          </Button>
         </div>
+      ) : null}
+
+      {lockOpen ? (
+        <AlertDialog open>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{employee.name} sperren?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Der Zugang wird gesperrt und alle Sessions gelöscht. Der Mitarbeiter bleibt
+                in der Liste.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="lock-reason">Grund (optional)</Label>
+                <Textarea
+                  id="lock-reason"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  maxLength={500}
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <AlertDialogCancel type="button">Abbrechen</AlertDialogCancel>
+                <Button type="button" variant="destructive" disabled={busy} onClick={lock}>
+                  Sperren
+                </Button>
+              </div>
+            </div>
+          </AlertDialogContent>
+        </AlertDialog>
       ) : null}
 
       {password ? <StartPasswordDialog password={password} onClose={() => setPassword(null)} /> : null}

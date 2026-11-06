@@ -25,7 +25,10 @@ export function CompanyStatusBadge({
   initial: CompanyStatus;
   poll?: boolean;
 }) {
-  const [status, setStatus] = useState(initial);
+  const [polled, setPolled] = useState<{ stamp: CompanyStatus; basedOn: CompanyStatus } | null>(null);
+
+  // Ein neuer Server-Wert (Revalidate nach dem Stempeln) gewinnt gegen einen alten Poll.
+  const status = polled?.basedOn === initial ? polled.stamp : initial;
 
   useEffect(() => {
     if (!poll) return;
@@ -36,7 +39,7 @@ export function CompanyStatusBadge({
       fetch("/api/status", { cache: "no-store" })
         .then((res) => (res.ok ? (res.json() as Promise<CompanyStatus>) : null))
         .then((next) => {
-          if (next) setStatus(next);
+          if (next) setPolled({ stamp: next, basedOn: initial });
         })
         .catch(() => {
           /* letzter bekannter Zustand bleibt stehen */
@@ -44,7 +47,7 @@ export function CompanyStatusBadge({
     }, STATUS_POLL_MS);
 
     return () => clearInterval(timer);
-  }, [poll]);
+  }, [poll, initial]);
 
   const title =
     status.mode === "AUTO"

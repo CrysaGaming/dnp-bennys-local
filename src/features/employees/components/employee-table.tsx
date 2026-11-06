@@ -3,9 +3,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { initialsOf } from "@/lib/initials";
+import { formatDuration } from "@/lib/format";
 import type { EmployeeRow } from "../service";
 
-/** Mitarbeiterliste (Spec 5.6). Der Wert in „Stunden (Woche)” kommt mit Task 5.2. */
+/** Mitarbeiterliste (Spec 5.6). */
 export function EmployeeTable({ employees }: { employees: EmployeeRow[] }) {
   return (
     <Table>
@@ -35,7 +36,7 @@ export function EmployeeTable({ employees }: { employees: EmployeeRow[] }) {
             </TableCell>
             <TableCell className="font-mono tabular-nums">{e.serviceNumber}</TableCell>
             <TableCell>{statusLabel(e.status)}</TableCell>
-            <TableCell className="font-mono tabular-nums">—</TableCell>
+            <TableCell className="font-mono tabular-nums">{formatDuration(e.minutesThisWeek)}</TableCell>
           </TableRow>
         ))}
       </TableBody>

@@ -6,10 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AvatarUpload } from "@/features/account/components/avatar-upload";
 import { ProfileForm } from "@/features/account/components/profile-form";
 import { getProfile } from "@/features/account/service";
+import { minutesThisWeek } from "@/features/time/service";
+import { weekStartBerlin } from "@/features/time/calc";
+import { formatDuration } from "@/lib/format";
 
 async function Content() {
   const ctx = await requireSession();
   const profile = await getProfile(ctx);
+  const minutes = await minutesThisWeek(ctx, ctx.employeeId, weekStartBerlin(new Date()));
 
   return (
     <div className="flex flex-col gap-6">
@@ -34,6 +38,13 @@ async function Content() {
         <CardContent>
           <ProfileForm name={profile.name} phone={profile.phone} />
         </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-display text-lg uppercase">Stunden dieser Woche</CardTitle>
+        </CardHeader>
+        <CardContent className="font-mono tabular-nums">{formatDuration(minutes)}</CardContent>
       </Card>
 
       <Card>

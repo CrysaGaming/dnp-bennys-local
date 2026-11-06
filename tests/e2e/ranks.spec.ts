@@ -18,7 +18,7 @@ test.describe("Ränge", () => {
       await expect(page.getByLabel("Name")).toBeVisible({ timeout: 2000 });
     }).toPass({ timeout: 15_000 });
 
-    await page.getByLabel("Name").fill("Mechaniker");
+    await page.getByLabel("Name").fill("E2E-Rang");
     await page.getByLabel("Level").fill("20");
 
     const verwalten = page.getByRole("checkbox", { name: "Ressourcen: Verwalten" });
@@ -33,7 +33,7 @@ test.describe("Ränge", () => {
 
     await page.getByRole("button", { name: "Rang speichern" }).click();
 
-    await expect(page.getByRole("row", { name: /Mechaniker/ })).toContainText("2 Rechte");
+    await expect(page.getByRole("row", { name: /E2E-Rang/ })).toContainText("2 Rechte");
   });
 
   test("Admin-Rang hat Schloss statt Menü", async ({ page }) => {

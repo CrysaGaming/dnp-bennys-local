@@ -10,7 +10,12 @@ function mockFetch(status: CompanyStatus) {
 }
 
 describe("CompanyStatusBadge", () => {
-  beforeEach(() => vi.useFakeTimers());
+  beforeEach(() => {
+    vi.useFakeTimers();
+    // Der versteckte-Tab-Test setzt document.hidden – ohne dieses Zurücksetzen läuft er
+    // in die folgenden Tests hinein.
+    Object.defineProperty(document, "hidden", { value: false, configurable: true });
+  });
   afterEach(() => {
     vi.useRealTimers();
     vi.unstubAllGlobals();
@@ -48,6 +53,25 @@ describe("CompanyStatusBadge", () => {
     });
 
     expect(fetchMock).not.toHaveBeenCalled();
+    expect(screen.getByText("GEÖFFNET")).toBeInTheDocument();
+  });
+
+  it("lässt den neuen Server-Wert gewinnen, wenn er nach dem alten Poll kommt", async () => {
+    // Regression: nach dem Stempeln revalidiert die Action das Layout. Der Badge darf
+    // nicht auf dem älteren Poll stehen bleiben.
+    const fetchMock = mockFetch({ ...OPEN, isOpen: false });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { rerender } = render(<CompanyStatusBadge initial={OPEN} />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(30_000);
+    });
+
+    expect(screen.getByText("GESCHLOSSEN")).toBeInTheDocument();
+
+    rerender(<CompanyStatusBadge initial={{ ...OPEN }} />);
+
     expect(screen.getByText("GEÖFFNET")).toBeInTheDocument();
   });
 
