@@ -8,7 +8,7 @@ import { seed } from "../../prisma/seed";
 import { prisma, resetDb, seedEnv } from "./helpers/db";
 import { ctxForUsername } from "@tests/helpers/session";
 
-const ADMIN_PASSWORD = "E2E-Passwort-456";
+export const E2E_ADMIN_PASSWORD = "E2E-Passwort-456";
 
 /** Aus dem Set-Cookie-Wert einen Cookie-Header bauen (better-auth liest `cookie`). */
 function cookieHeader(setCookie: string): Headers {
@@ -61,7 +61,7 @@ export default async function globalSetup(): Promise<void> {
   const headers = cookieHeader(setCookie);
 
   await auth.api.changePassword({
-    body: { currentPassword: seedEnv.adminPassword!, newPassword: ADMIN_PASSWORD },
+    body: { currentPassword: seedEnv.adminPassword!, newPassword: E2E_ADMIN_PASSWORD },
     headers,
   });
 

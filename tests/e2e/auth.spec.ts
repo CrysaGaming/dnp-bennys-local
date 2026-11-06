@@ -1,10 +1,11 @@
 import { expect, test } from "@playwright/test";
+import { E2E_ADMIN_PASSWORD } from "./global-setup";
 import { loginAs } from "./helpers/login";
 import { createLoginUser, prisma } from "./helpers/db";
 
 // Die DB wird einmal in global-setup geleert und geseedet – pro Test nur neue
-// Benutzer anlegen, sonst wäre die Admin-Session (Storage-State) weg.
-const STORAGE_STATE = "tests/e2e/.auth/admin.json";
+// Benutzer anlegen, sonst wären die Seed-Daten und die Admin-Session (Storage-State
+// für die anderen Specs) weg.
 
 test("ohne Session auf /login", async ({ page }) => {
   await page.goto("/dashboard");
@@ -46,17 +47,17 @@ test("erzwingt Passwortwechsel beim ersten Login", async ({ page }) => {
   });
 });
 
-test.describe("mit Admin-Session", () => {
-  test.use({ storageState: STORAGE_STATE });
+test("Logout führt zu /login", async ({ page }) => {
+  // Eigene Session über das Formular: das Sign-Out widerruft sie in der DB. Über den
+  // Storage-State wäre die gemeinsame Admin-Session danach tot und alle späteren Tests
+  // landen auf /login – je nachdem, welcher Worker welches File zuerst läuft.
+  await loginAs(page, "admin", E2E_ADMIN_PASSWORD);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
-  test("Logout führt zu /login", async ({ page }) => {
-    await page.goto("/dashboard");
-
-    // Das User-Menü im Header aufmachen (Spec 5.2), dann Logout.
-    await page.getByRole("button", { name: /Admin/ }).click();
-    await page.getByRole("button", { name: "Logout" }).click();
-    await expect(page).toHaveURL(/\/login$/);
-  });
+  // Das User-Menü im Header aufmachen (Spec 5.2), dann Logout.
+  await page.getByRole("button", { name: /Admin/ }).click();
+  await page.getByRole("button", { name: "Logout" }).click();
+  await expect(page).toHaveURL(/\/login$/);
 });
 
 test("veraltetes Cookie erzeugt keine Schleife", async ({ page, context }) => {
