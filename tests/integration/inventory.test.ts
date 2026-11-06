@@ -1,15 +1,9 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/prisma";
 import { bookMovement, createPart, listParts, updatePart } from "@/features/inventory/service";
 import { bookingSchema, partSchema } from "@/features/inventory/schemas";
 import { ConflictError, ForbiddenError, InsufficientStockError } from "@/lib/errors";
-import { createEmployeeForRank, createPart as makePart, fakeCtx, makeCtx } from "@tests/helpers/factories";
-
-let adminCtx: Awaited<ReturnType<typeof makeCtx>>;
-
-beforeAll(async () => {
-  adminCtx = await makeCtx({ permissions: ["INVENTORY_VIEW", "INVENTORY_MANAGE"] });
-});
+import { createEmployeeForRank, createPart as makePart, makeCtx } from "@tests/helpers/factories";
 
 afterAll(async () => {
   await prisma.$disconnect();

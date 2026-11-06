@@ -1,15 +1,13 @@
-import { z } from "zod";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { writeAudit } from "@/lib/audit";
 import { assertPermission } from "@/lib/permissions";
 import { ConflictError, NotFoundError } from "@/lib/errors";
 import type { SessionContext } from "@/lib/session-types";
+import type { MovementRow } from "./movement-types";
 import { isLowStock } from "./low-stock";
 import { bookingSchema, partSchema } from "./schemas";
 import { bookStock } from "./stock";
-
-const FIELD = { name: "name", sku: "sku" } as const;
 
 function conflict(e: unknown): ConflictError | null {
   if (!(e instanceof Prisma.PrismaClientKnownRequestError) || e.code !== "P2002") return null;
@@ -147,12 +145,20 @@ export async function bookMovement(ctx: SessionContext, input: unknown) {
   });
 }
 
-export async function listMovements(ctx: SessionContext, partId: string) {
+export async function listMovements(ctx: SessionContext, partId: string): Promise<MovementRow[]> {
   assertPermission(ctx, "INVENTORY_VIEW");
 
-  return prisma.stockMovement.findMany({
+  const rows = await prisma.stockMovement.findMany({
     where: { partId },
     orderBy: { createdAt: "desc" },
     take: 100,
   });
+
+  return rows.map((m) => ({
+    id: m.id,
+    delta: m.delta,
+    reason: m.reason,
+    note: m.note,
+    at: m.createdAt.toISOString(),
+  }));
 }
