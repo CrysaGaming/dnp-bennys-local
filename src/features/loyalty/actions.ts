@@ -43,6 +43,8 @@ export async function setRewardActiveAction(id: string, active: boolean): Promis
   return runAction((ctx) => setRewardActive(ctx, id, active), { revalidate: REVALIDATE });
 }
 
-export async function adjustLoyaltyAction(input: AdjustInput): Promise<ActionResult<unknown>> {
+export async function adjustLoyaltyAction(
+  input: AdjustInput,
+): Promise<ActionResult<{ balanceBefore: number; balanceAfter: number }>> {
   return runAction((ctx) => adjustLoyalty(ctx, input), { revalidate: [["/kunden", "page"]] });
 }

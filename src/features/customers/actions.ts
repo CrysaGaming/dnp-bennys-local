@@ -2,6 +2,7 @@
 
 import { runAction, type ActionResult } from "@/lib/action";
 import type { CustomerInput, VehicleInput } from "./schemas";
+import type { CustomerRow } from "./service";
 import {
   addVehicle,
   createCustomer,
@@ -20,7 +21,9 @@ export async function customerByNumberAction(number: number): Promise<ActionResu
   return runAction((ctx) => getCustomerByNumber(ctx, number), { revalidate: [["/kunden", "page"]] });
 }
 
-export async function saveCustomerAction(input: CustomerInput): Promise<ActionResult<unknown>> {
+export async function saveCustomerAction(
+  input: CustomerInput,
+): Promise<ActionResult<{ customer: CustomerRow; warnings: string[] }>> {
   return runAction((ctx) => createCustomer(ctx, input), { revalidate: [["/kunden", "page"]] });
 }
 

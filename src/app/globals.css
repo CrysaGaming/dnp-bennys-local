@@ -705,3 +705,71 @@ body {
     transform: scaleY(1);
   }
 }
+
+/* ── Stempelkarte und Punkte (Spec 5.7) ─────────────────────────────────── */
+
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) / 2);
+  color: var(--muted-foreground);
+  /* Die Drehung kommt über die Variable, damit der erste Render gleich bleibt. */
+  transform: rotate(var(--rot, 0deg));
+}
+
+.stamp--filled {
+  border-color: var(--primary);
+  background-image: var(--gradient-sunset);
+  color: var(--primary-foreground);
+}
+
+.stamp[data-new="true"] {
+  animation: stamp-pop 300ms ease-out both;
+}
+
+@keyframes stamp-pop {
+  from {
+    transform: scale(1.6) rotate(var(--rot, 0deg));
+  }
+  to {
+    transform: scale(1) rotate(var(--rot, 0deg));
+  }
+}
+
+@keyframes stamp-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Reduzierte Bewegung: nur der Fade (Spec 5.12). */
+[data-reduced-motion="true"] .stamp {
+  transform: none;
+  animation: stamp-fade 250ms ease-out both !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp {
+    transform: none;
+    animation: stamp-fade 250ms ease-out both !important;
+  }
+}
+
+.points-bar {
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--muted) 60%, transparent);
+  overflow: hidden;
+}
+
+.points-bar-fill {
+  height: 100%;
+  background-image: var(--gradient-sunset);
+}
