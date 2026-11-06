@@ -30,14 +30,36 @@ Aus der Übersicht: Punkt 2 (Prämie doppelt einlösen, Task 8.2 und 9.2) und Pu
 
 **Interfaces:**
 - Produces:
-  - `normalizePlate(input: string): string` (trimmen, Großbuchstaben, Leerzeichenfolgen → ein Leerzeichen), `plateSchema` (nach Normalisierung `^[A-Z0-9 ]{1,8}$`, Meldung „Kennzeichen: 1–8 Zeichen, nur A–Z, 0–9 und Leerzeichen“), `phoneDigits(s: string): string`, `formatCustomerNumber(n: number): string`
+  - `normalizePlate(input: string): string` (trimmen, Großbuchstaben, Leerzeichenfolgen → ein Leerzeichen), `plateSchema` (nach Normalisierung `^[A-Z0-9 ]{1,8}# Benny's Portal – Plan 05: Kunden, Treue, Aufträge, Rechnungen (Phase 8–9)
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Kundenkartei mit Fahrzeugen, Treuesystem (Stempel oder Punkte) mit Einstellungsseite und Prämien, Aufträge mit Preisberechnung, Lagerverbrauch und Prämien-Einlösung sowie Rechnungen mit automatischer Gutschrift.
+
+**Architecture:** Alle Geldbeträge rechnet nur `calcOrderTotals` aus. Alle Treue-Buchungen laufen über `bookLoyalty`, alle Bestandsänderungen über `bookStock` (Plan 04). Statuswechsel prüft eine reine Übergangstabelle. Jede Fachfunktion arbeitet in einer Prisma-Transaktion.
+
+**Tech Stack:** wie Übersicht.
+
+**Spec:** `docs/superpowers/specs/2026-11-05-bennys-portal-design.md` (Abschnitte 3.6, 5.6, 5.7, 5.10, 7.3–7.5)
+
+## Global Constraints
+
+Gelten wie in `2026-11-05-00-uebersicht.md`.
+
+## Review Focus
+
+Aus der Übersicht: Punkt 2 (Prämie doppelt einlösen, Task 8.2 und 9.2) und Punkt 4 (Kennzeichen-Normalisierung, Task 8.1). Zusätzlich: Eine Rechnung wird ungültig, nachdem der Kunde die Gutschrift schon ausgegeben hat. Erwartung: Das Konto bleibt bei 0 und wird nicht negativ (Task 9.3).
+
+---
+
+, Meldung „Kennzeichen: 1–8 Zeichen, nur A–Z, 0–9 und Leerzeichen“), `phoneDigits(s: string): string`, `formatCustomerNumber(n: number): string`
   - `customerSchema`: name 2–60, phone ≤ 20 (leer → `null`), notes ≤ 500, vehicles: bis 10 × `{ model: 1–40, plate, color: ≤ 20 | null }`
   - `type CustomerRow = { id: string; number: number; name: string; phone: string | null; plates: string[]; loyaltyBalance: number; lastVisitAt: Date | null }`
   - `searchCustomers(ctx, q: string, limit?: number): Promise<CustomerRow[]>` (`CUSTOMERS_VIEW`; leeres `q` → alle nach Name, max. 200)
   - `getCustomerByNumber(ctx, number: number)` (mit Fahrzeugen, letzten 20 Aufträgen, letzten 50 Treue-Buchungen)
   - `createCustomer(ctx, input: unknown): Promise<{ customer: Customer; warnings: string[] }>`, `updateCustomer(ctx, id, input)`, `addVehicle(ctx, customerId, v)`, `removeVehicle(ctx, vehicleId)` (mit Aufträgen: nur vom Kunden lösen, sonst löschen), `deleteCustomer(ctx, id)`; alles Schreibende mit `CUSTOMERS_EDIT`
 
-- [ ] **Step 1: Failing Tests**
+- [x] **Step 1: Failing Tests**
 
 ```ts
 // normalize.test.ts – Review Focus 4
@@ -54,10 +76,10 @@ expect(formatCustomerNumber(42)).toBe("#0042");
 - `deleteCustomer` mit Auftrag → „Kunde hat Aufträge oder Treue-Buchungen und kann nicht gelöscht werden.“; ohne → gelöscht, Audit `customer.delete`
 - ohne `CUSTOMERS_EDIT` → `ForbiddenError`
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren** – Die Telefonsuche läuft per `$queryRaw` über `regexp_replace(phone, '\D', '', 'g') LIKE '%' || $digits || '%'` und liefert IDs. Diese werden mit den Treffern aus Name und Kennzeichen (Prisma `contains`, `mode: "insensitive"`) vereinigt.
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(kunden): Kunden-Service mit Fahrzeugen und Suche`
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren** – Die Telefonsuche läuft per `$queryRaw` über `regexp_replace(phone, '\D', '', 'g') LIKE '%' || $digits || '%'` und liefert IDs. Diese werden mit den Treffern aus Name und Kennzeichen (Prisma `contains`, `mode: "insensitive"`) vereinigt.
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(kunden): Kunden-Service mit Fahrzeugen und Suche`
 
 ### Task 8.2: Treue-Kern
 
@@ -74,7 +96,7 @@ expect(formatCustomerNumber(42)).toBe("#0042");
   - `loyaltySettingsSchema` (stampsPerVisit 1–10, cardSize 4–20, dollarsPerPoint 1–100.000, minVisitTotal 0–10.000.000, cooldownHours 0–168), `rewardSchema` (name 2–40, description ≤ 200, cost 1–1000, type, value: Prozent 1–100 bzw. $ 1–10.000.000 bzw. 0, `priceListItemId` Pflicht genau bei `FREE_SERVICE` mit Meldung „Bitte eine Leistung wählen“)
   - `getLoyaltySettings(): Promise<LoyaltySettings>`, `updateLoyaltySettings(ctx, input)`, `listRewards(ctx, opts?: { includeInactive?: boolean })`, `createReward(ctx, input)`, `updateReward(ctx, id, input)`, `setRewardActive(ctx, id, active)`, `adjustLoyalty(ctx, input: { customerId: string; amount: number; note: string })`; Schreibendes mit `LOYALTY_MANAGE`
 
-- [ ] **Step 1: Failing Tests**
+- [x] **Step 1: Failing Tests**
 
 ```ts
 // earn.test.ts
@@ -106,13 +128,13 @@ expect(stampRotation(3)).toBe(stampRotation(3));
 - `adjustLoyalty(+7, "Papierkarte übertragen")` → Guthaben 7, Buchung `ADJUSTMENT` mit `balanceAfter: 7`; Notiz unter 3 Zeichen → zod-Fehler
 - Review Focus 2: Guthaben 5, zweimal parallel `bookLoyalty(REDEEM, -3)` in je eigener Transaktion → genau eine erfolgreich, Guthaben 2
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren**
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren**
   - `bookLoyalty` zieht negative Beträge per `updateMany({ where: { id, loyaltyBalance: { gte: -amount } }, data: { loyaltyBalance: { decrement: -amount } } })` ab. `count === 0` heißt `InsufficientLoyaltyError`.
   - Danach wird die Buchung mit `balanceAfter` angelegt. Bei `visitAt` wird zusätzlich `lastVisitAt` gesetzt.
   - `calcEarn`: Die Sperrzeit gilt erfüllt, wenn `now - lastVisitAt >= cooldownHours`.
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(treue): Gutschrift, Buchungsjournal und Einstellungen`
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(treue): Gutschrift, Buchungsjournal und Einstellungen`
 
 ### Task 8.3: Kunden-Oberfläche mit Stempelkarte
 
@@ -123,7 +145,7 @@ expect(stampRotation(3)).toBe(stampRotation(3));
 - Consumes: Kunden- und Treue-Actions, `stampCardView`, `stampRotation`, `formatCustomerNumber`
 - Produces: `StampCard({ balance, cardSize, nextReward }: { balance: number; cardSize: number; nextReward: { name: string; cost: number } | null })`, `PointsBar({ balance, nextReward })`
 
-- [ ] **Step 1: Failing Tests**
+- [x] **Step 1: Failing Tests**
 
 `stamp-card.test.tsx`:
 - `balance 7, cardSize 10, nextReward { "20 % Rabatt", 10 }` → 7 Elemente `[data-stamp="filled"]`, 3 `[data-stamp="empty"]`, Text „Noch 3 Stempel bis „20 % Rabatt““
@@ -144,13 +166,13 @@ test("manuelle Gutschrift erscheint auf der Stempelkarte", async ({ page }) => {
 });
 ```
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren** nach Spec 5.6 und 5.7:
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren** nach Spec 5.6 und 5.7:
   - Die neu hinzugekommenen Stempel bekommen die Animation (Scale 1.6 → 1, Drehung, 300 ms). Der zuletzt gesehene Stand liegt in `localStorage` (`bennys:stamps-seen:<kundenId>`, `try/catch`).
   - „Neuer Auftrag“ führt zu `/auftraege/neu?kunde=<nummer>`, „Einlösen“ zu `…&praemie=<id>`.
   - Warnungen aus `createCustomer` erscheinen als Hinweis-Toast.
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(kunden): Kundenkartei, Kundenkarte und Stempelkarte`
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(kunden): Kundenkartei, Kundenkarte und Stempelkarte`
 
 ### Task 8.4: Treueprämien und Treue-Einstellungen
 
@@ -160,7 +182,7 @@ test("manuelle Gutschrift erscheint auf der Stempelkarte", async ({ page }) => {
 **Interfaces:**
 - Consumes: `exampleText`, `StampCard`, `PointsBar`, Treue-Actions, `getPriceList`
 
-- [ ] **Step 1: Failing E2E**
+- [x] **Step 1: Failing E2E**
 
 ```ts
 test("Treuesystem einschalten", async ({ page }) => {
@@ -179,13 +201,13 @@ test("Prämie Gratis-Leistung anlegen", async ({ page }) => {
 });
 ```
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren** nach Spec 5.10:
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren** nach Spec 5.10:
   - Die Felder hängen vom Modus ab, die Live-Vorschau zeigt `StampCard` bzw. `PointsBar` mit Beispielguthaben.
   - Ist der Modus gesperrt, steht die Begründung daneben.
   - Ohne `LOYALTY_MANAGE` ist alles schreibgeschützt.
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(treue): Prämien- und Einstellungsseite`
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(treue): Prämien- und Einstellungsseite`
 
 ---
 
