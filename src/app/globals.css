@@ -2,7 +2,10 @@
 
 /* ── Design-Tokens (Spec 4.2), in OKLCH umgerechnet ───────────────────── */
 
-:root {
+/* `.light` erzwingt die hellen Tokens in einem Teilbaum – für die Logo-Karten und
+   die Vorschau (Spec 5.11), die immer beide Seiten zeigen. */
+:root,
+.light {
   --background: oklch(0.9798 0.0045 78.3); /* #FAF8F5 */
   --foreground: oklch(0.2103 0.0059 285.9); /* #18181B */
   --card: oklch(1 0 0); /* #FFFFFF */

@@ -18,11 +18,14 @@ export function BrandLogo({
   layout,
   companyName,
   className,
+  showName = true,
 }: {
   variant: LogoVariant;
   layout: LogoLayout;
   companyName: string;
   className?: string;
+  /** Fürs Favicon steht nur die Marke, ohne den Namen daneben. */
+  showName?: boolean;
 }) {
   const scope = useId().replace(/[^a-zA-Z0-9]/g, "");
   const markup: Record<LogoTheme, string> =
@@ -46,14 +49,14 @@ export function BrandLogo({
           key={theme}
           data-logo-theme={theme}
           className={cn(
-            "[&>svg]:block [&>svg]:h-full [&>svg]:w-auto",
-            theme === "dark" ? "hidden dark:inline-block" : "inline-block dark:hidden",
+            "flex h-full items-center [&>svg]:block [&>svg]:h-full [&>svg]:w-auto",
+            theme === "dark" ? "hidden dark:flex" : "flex dark:hidden",
           )}
           dangerouslySetInnerHTML={{ __html: scopeSvgIds(markup[theme], `${scope}-${theme}`) }}
         />
       ))}
 
-      {variant === "EMBLEM" && (
+      {variant === "EMBLEM" && showName && (
         <span className="font-display text-lg uppercase leading-none">{companyName}</span>
       )}
     </span>
