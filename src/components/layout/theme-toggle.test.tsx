@@ -24,6 +24,17 @@ function stubMatchMedia(matches: boolean) {
 }
 
 describe("ThemeToggle", () => {
+  it("hat einen festen Namen und feste Icon-Klassen – sonst ist der erste Client-Render anders als das Server-HTML", () => {
+    stubMatchMedia(false);
+    render(<ThemeToggle />);
+
+    const button = screen.getByRole("button", { name: "Design wechseln" });
+
+    expect(button.getAttribute("aria-label")).toBe("Design wechseln");
+    expect(button.querySelector("svg")?.getAttribute("class")).not.toContain("scale-0");
+    expect(button.querySelectorAll("svg")[1]?.getAttribute("class")).not.toContain("scale-0");
+  });
+
   beforeEach(() => {
     delete (document as unknown as { startViewTransition?: unknown }).startViewTransition;
     setTheme.mockClear();
@@ -37,7 +48,7 @@ describe("ThemeToggle", () => {
     stubMatchMedia(false);
     render(<ThemeToggle />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Zu hellem Design wechseln" }));
+    fireEvent.click(screen.getByRole("button", { name: "Design wechseln" }));
 
     expect(setTheme).toHaveBeenCalledWith("light");
   });
@@ -47,7 +58,7 @@ describe("ThemeToggle", () => {
     stubMatchMedia(false);
     render(<ThemeToggle />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Zu dunklem Design wechseln" }));
+    fireEvent.click(screen.getByRole("button", { name: "Design wechseln" }));
 
     expect(setTheme).toHaveBeenCalledWith("dark");
   });
@@ -57,7 +68,7 @@ describe("ThemeToggle", () => {
     const start = stubViewTransition();
     render(<ThemeToggle />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Zu hellem Design wechseln" }));
+    fireEvent.click(screen.getByRole("button", { name: "Design wechseln" }));
 
     expect(start).toHaveBeenCalled();
     expect(document.documentElement.style.getPropertyValue("--vt-x")).toMatch(/px$/);
@@ -69,7 +80,7 @@ describe("ThemeToggle", () => {
     const start = stubViewTransition();
     render(<ThemeToggle />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Zu hellem Design wechseln" }));
+    fireEvent.click(screen.getByRole("button", { name: "Design wechseln" }));
 
     expect(start).not.toHaveBeenCalled();
     expect(setTheme).toHaveBeenCalledWith("light");

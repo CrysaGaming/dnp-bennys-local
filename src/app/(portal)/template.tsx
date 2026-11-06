@@ -1,18 +1,14 @@
-"use client";
+import type { ReactNode } from "react";
 
-import { motion, useReducedMotion } from "motion/react";
-
-/** Seitenwechsel: Fade plus 4 px Slide, 200 ms ease-out (Spec 4.3). */
-export default function PortalTemplate({ children }: { children: React.ReactNode }) {
-  const reduced = useReducedMotion();
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: reduced ? 0 : 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-    >
-      {children}
-    </motion.div>
-  );
+/**
+ * Seitenwechsel: Fade plus 4 px Slide, 200 ms ease-out (Spec 4.3).
+ *
+ * Rein über CSS, nicht über motion. motion schrieb dem Server das `initial` in den Style und
+ * der Client renderte bereits das `animate` – zwei verschiedene erste Render, also die
+ * Hydration-Meldung. Ein CSS-Animation-Element ist auf beiden Seiten identisch, und die
+ * Entscheidung „Bewegung oder nur Fade“ fällt die CSS-Regel über die Nutzer-Einstellung
+ * (data-reduced-motion) und die Medienabfrage, nicht ein Client-Hook.
+ */
+export default function PortalTemplate({ children }: { children: ReactNode }) {
+  return <div className="page-enter">{children}</div>;
 }

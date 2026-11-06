@@ -161,7 +161,69 @@ body {
   }
 }
 
+/* ── Seitenwechsel (Spec 4.3): Fade, 4 px Slide nur wenn Bewegung erlaubt ist ── */
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Kein React-Style an diesem Element – Server- und Client-Render sind identisch, darum
+   keine Hydration-Differenz. Die Entscheidung fällt die CSS-Regel, nicht ein Client-Hook. */
+.page-enter {
+  animation: page-enter 200ms ease-out both;
+}
+
+/* Reduzierte Bewegung: nur der Fade bleibt (Spec 5.12). Higher Specificity als die globale
+   Regel oben, damit der Fade nicht auf 0,01 ms gezogen wird. */
+[data-reduced-motion="true"] .page-enter {
+  animation: page-fade 250ms ease-out both !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: page-fade 250ms ease-out both !important;
+  }
+}
+
 /* ── Theme-Wechsel: Kreis-Übergang ab dem Toggle (Spec 4.3 / 5.2) ────────── */
+
+/* Das Ziel-Icon wird über CSS am html-Klassen gewählt, nicht über React – sonst ist der
+   erste Client-Render anders als das Server-HTML (Hydration-Differenz). */
+.theme-icon {
+  transition: transform 300ms ease;
+}
+
+.theme-icon--sun {
+  transform: scale(0) rotate(-90deg);
+}
+
+.theme-icon--moon {
+  transform: scale(1) rotate(0);
+}
+
+.dark .theme-icon--sun {
+  transform: scale(1) rotate(0);
+}
+
+.dark .theme-icon--moon {
+  transform: scale(0) rotate(90deg);
+}
 
 :root {
   --vt-x: 50vw;

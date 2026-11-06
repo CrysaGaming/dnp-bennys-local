@@ -17,13 +17,21 @@ function viewTransitionOrigin(el: HTMLElement): { x: number; y: number } {
   return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
 }
 
+/**
+ * Der Umschalter darf nichts vom aufgelösten Theme abhängig machen, was im ersten Render
+ * steht: `useTheme()` kennt den Systemwert erst auf dem Client, das Server-HTML hat die
+ * Vorgabe – das war die gemeldete Hydration-Differenz (Name und Icon-Klassen).
+ *
+ * Darum: fester Name, feste Icon-Klassen. Welches Icon steht, entscheidet CSS am html-Klassen
+ * (globals.css), und das Ziel wird erst beim Klick aufgelöst.
+ */
 export function ThemeToggle({ className }: { className?: string }) {
-  const { theme, resolvedTheme, setTheme } = useTheme();
-  const current = resolvedTheme ?? theme ?? "dark";
-  const next = current === "dark" ? "light" : "dark";
+  const { resolvedTheme, setTheme } = useTheme();
 
   function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
     const { x, y } = viewTransitionOrigin(event.currentTarget);
+    const current = resolvedTheme ?? "dark";
+    const next = current === "dark" ? "light" : "dark";
 
     if (typeof document.startViewTransition !== "function" || prefersReducedMotion()) {
       setTheme(next);
@@ -40,24 +48,12 @@ export function ThemeToggle({ className }: { className?: string }) {
       type="button"
       variant="ghost"
       size="icon"
-      aria-label={`Zu ${next === "light" ? "hellem" : "dunklem"} Design wechseln`}
+      aria-label="Design wechseln"
       onClick={handleClick}
       className={cn("relative", className)}
     >
-      <Sun
-        aria-hidden
-        className={cn(
-          "size-5 transition-transform duration-300",
-          next === "light" ? "scale-100 rotate-0" : "scale-0 -rotate-90",
-        )}
-      />
-      <Moon
-        aria-hidden
-        className={cn(
-          "absolute inset-0 size-5 transition-transform duration-300",
-          next === "light" ? "scale-0 rotate-90" : "scale-100 rotate-0",
-        )}
-      />
+      <Sun aria-hidden className="theme-icon theme-icon--sun size-5" />
+      <Moon aria-hidden className="theme-icon theme-icon--moon absolute inset-0 size-5" />
     </Button>
   );
 }
