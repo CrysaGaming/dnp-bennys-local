@@ -57,26 +57,38 @@ export async function seed(db: PrismaClient, env: SeedEnv): Promise<void> {
   }
 
   const username = env.adminUsername;
-  const existing = await db.user.findUnique({ where: { username } });
-  if (existing) return;
+  const existingUser = await db.user.findUnique({ where: { username } });
+  const userId =
+    existingUser?.id ??
+    (await auth.api.createUser({
+      body: {
+        email: internalEmail(username),
+        password: env.adminPassword,
+        name: "Admin",
+        role: "admin",
+        data: { username },
+      },
+    })).user.id;
 
-  const created = await auth.api.createUser({
-    body: {
-      email: internalEmail(username),
-      password: env.adminPassword,
-      name: "Admin",
-      role: "admin",
-      data: { username },
-    },
-  });
+  // Die Dienstnummer ist unique. Der Admin bekommt die kleinste freie Zahl – eine feste 1
+  // scheitert, wenn sie schon vergeben ist, und dann bleibt der Employee fehlen.
+  const used = new Set(
+    (await db.employee.findMany({ select: { serviceNumber: true } })).map((e) => e.serviceNumber),
+  );
+  let serviceNumber = 1;
+  while (used.has(serviceNumber)) serviceNumber += 1;
 
-  await db.employee.create({
-    data: {
-      userId: created.user.id,
+  // Ohne Employee-Zeile ist kein Login möglich (Spec 3.2). Ein Lauf, der nach dem User
+  // abgebrochen ist, darf nicht einfach zurückkehren – upsert holt die Zeile nach.
+  await db.employee.upsert({
+    where: { userId },
+    create: {
+      userId,
       rankId: adminRank.id,
-      serviceNumber: 1,
+      serviceNumber,
       mustChangePassword: true,
     },
+    update: {},
   });
 }
 
