@@ -129,3 +129,9 @@ export async function createEmployeeForRank(rankId: string) {
     data: { userId: user.id, rankId, serviceNumber: (await prisma.employee.count()) + 1 },
   });
 }
+
+export async function createPart(data: Partial<Prisma.PartCreateInput> = {}) {
+  return prisma.part.create({
+    data: { name: `Teil ${randomUUID().slice(0, 8)}`, ...data },
+  });
+}
