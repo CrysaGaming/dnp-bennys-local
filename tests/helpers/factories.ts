@@ -112,3 +112,20 @@ export function fakeCtx(
 export async function createCustomer(name = "Test Kunde") {
   return prisma.customer.create({ data: { name } });
 }
+
+/** Employee für einen bestehenden Rang – wenn die Rang-Zuordnung für den Test zählt. */
+export async function createEmployeeForRank(rankId: string) {
+  const user = await prisma.user.create({
+    data: {
+      id: randomUUID(),
+      name: `Mitarbeiter ${await prisma.employee.count() + 1}`,
+      username: `mitarbeiter-${randomUUID().slice(0, 8)}`,
+      email: `mitarbeiter-${randomUUID().slice(0, 8)}@bennys.local`,
+    },
+  });
+
+  // Dienstnummer ist unique – die Zahl wird hier gezählt, nicht übergeben.
+  return prisma.employee.create({
+    data: { userId: user.id, rankId, serviceNumber: (await prisma.employee.count()) + 1 },
+  });
+}
