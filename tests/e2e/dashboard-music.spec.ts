@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { chromium, expect, test } from "@playwright/test";
 import { prisma } from "./helpers/db";
 
 const STORAGE_STATE = "tests/e2e/.auth/admin.json";
@@ -33,7 +33,7 @@ test.describe("Musik im Dashboard", () => {
     }).toPass({ timeout: 20_000 });
   });
 
-  test("pausiert bis zur ersten Aktion, dann läuft sie", async ({ browser }) => {
+  test("pausiert bis zur ersten Aktion, dann läuft sie", async () => {
     const admin = await prisma.user.findFirst({ where: { username: "admin" } });
     await prisma.userPreference.upsert({
       where: { userId: admin!.id },
@@ -41,10 +41,14 @@ test.describe("Musik im Dashboard", () => {
       update: { dashboardMusic: true, musicVolume: 35 },
     });
 
+    // Eigenes Profil: die anderen Specs klicken auf localhost und heben damit den
+    // Media-Engagement-Wert im gemeinsamen Profil – dann wäre Autoplay nicht mehr
+    // blockiert und der Test hinge von der Browser-Historie ab, nicht von unserem Code.
+    const browser = await chromium.launch({ args: ["--autoplay-policy=user-gesture-required"] });
     const context = await browser.newContext({ storageState: STORAGE_STATE });
     const page = await context.newPage();
 
-    await page.goto("/dashboard");
+    await page.goto("http://localhost:3100/dashboard");
 
     const button = page.getByRole("button", { name: "Musik im Dashboard" });
     await expect(button).toHaveAttribute("data-state", "paused");
@@ -55,5 +59,6 @@ test.describe("Musik im Dashboard", () => {
     }).toPass({ timeout: 20_000 });
 
     await context.close();
+    await browser.close();
   });
 });
