@@ -1,42 +1,34 @@
-import { Suspense } from "react";
 import { headers } from "next/headers";
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { getSessionContext } from "@/lib/dal";
-import { LoginForm } from "./_components/login-form";
+import { getCompanySettings } from "@/features/company/service";
+import { LoginScene } from "./_components/login-scene";
 
 /**
- * Login-Szene: immer dunkel, Wortmark im Sunset-Verlauf, keine Musik (Spec 4.6).
- * Die Session-Prüft läuft innerhalb einer Suspense-Grenze – `cacheComponents`
- * erlaubt Runtime-Daten sonst nur beim ersten Render, nicht bei einer Navigation.
+ * Login-Szene (Spec 6.1–6.3): immer dunkel, unabhängig vom gewählten Theme. Wer schon
+ * eine echte Session hat, wird direkt umgeleitet und sieht das Intro nicht (Spec 3.2).
+ * Die Session-Prüfung läuft innerhalb der Suspense-Grenze, weil `cacheComponents`
+ * Runtime-Daten sonst nur beim ersten Render erlaubt.
  */
 async function Scene() {
+  // Die Session ist pro Request unterschiedlich, also darf dieser Teil nicht prärendered
+  // werden – sonst läuft Better Auth beim Prerender und Next meldet `crypto.randomUUID()`
+  // als instabilen Wert (und die Szene steht doppelt im HTML).
+  await connection();
+
   const ctx = await getSessionContext(await headers());
   if (ctx) redirect("/dashboard");
 
+  const settings = await getCompanySettings();
+
   return (
-    <div className="w-full max-w-md">
-      <div className="mb-8 flex flex-col items-start gap-2">
-        <span className="font-display bg-sunset bg-clip-text text-4xl leading-none tracking-tight text-transparent uppercase">
-          Benny&apos;s
-        </span>
-        <span className="text-sm text-muted-foreground">Mitarbeiterportal · DNP Roleplay</span>
-      </div>
-
-      <LoginForm />
-
-      <p className="mt-6 text-sm text-muted-foreground">
-        Accounts legt der Chef von Benny&apos;s an – keine Selbstregistrierung.
-      </p>
-    </div>
+    <main className="dark login-scene bg-background text-foreground">
+      <LoginScene companyName={settings.name} logoVariant={settings.logoVariant} />
+    </main>
   );
 }
 
 export default function LoginPage() {
-  return (
-    <main className="dark flex min-h-dvh flex-col items-center justify-center bg-background px-6 py-12 text-foreground">
-      <Suspense fallback={<div>Wird geladen…</div>}>
-        <Scene />
-      </Suspense>
-    </main>
-  );
+  return <Scene />;
 }

@@ -207,3 +207,420 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Login-Szene (Spec 6.2 / 6.3) ──────────────────────────────────────── */
+
+/* Nur transform und opacity für Bewegungen (Spec 6.5). */
+
+.login-scene {
+  position: relative;
+  min-height: 100dvh;
+}
+
+.login-content,
+.login-intro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-intro {
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  cursor: pointer;
+}
+
+.login-intro-shade {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.65);
+}
+
+.login-silhouette {
+  filter: brightness(0) opacity(0.75);
+}
+
+.login-pulse {
+  animation: login-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes login-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+.login-stage {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.login-hud-row {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+}
+
+/* Ebene 2 – Farbe, wandert langsam. */
+.login-gradient {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(120deg, var(--accent-violet), var(--primary), var(--accent-orange));
+  background-size: 200% 200%;
+  mix-blend-mode: soft-light;
+  opacity: 0.7;
+  animation: login-drift 24s ease-in-out infinite;
+}
+
+@keyframes login-drift {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+/* Ebene 3 – Palmen, Scheinwerfer, Grain, Vignette, Scanlines. */
+.login-palms {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 120px;
+  color: rgb(0 0 0 / 0.7);
+  padding: 0 1.5rem;
+}
+
+.login-streak {
+  position: absolute;
+  top: 35%;
+  left: -20%;
+  width: 60%;
+  height: 2px;
+  background-image: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.5), transparent);
+  animation: login-streak 7s linear infinite;
+}
+
+@keyframes login-streak {
+  0% {
+    transform: translateX(-20%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(220%);
+    opacity: 0;
+  }
+}
+
+.login-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: login-grain 1.2s steps(3) infinite;
+}
+
+@keyframes login-grain {
+  0% {
+    opacity: 0.05;
+  }
+  50% {
+    opacity: 0.08;
+  }
+  100% {
+    opacity: 0.05;
+  }
+}
+
+.login-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 40%, rgb(0 0 0 / 0.55) 100%);
+}
+
+.login-scanlines {
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  background-image: repeating-linear-gradient(0deg, rgb(255 255 255 / 0.05) 0 1px, transparent 1px 3px);
+}
+
+.login-slideshow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.login-ken-burns {
+  animation: login-ken-burns 9s ease-out both;
+}
+
+@keyframes login-ken-burns {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.12);
+  }
+}
+
+/* Karten- und Feld-Animationen. */
+.login-card {
+  width: min(100%, 28rem);
+  padding: 1.5rem;
+  background: rgb(0 0 0 / 0.55);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  backdrop-filter: blur(12px);
+}
+
+.login-card-shake {
+  animation: login-shake 320ms ease-in-out both;
+}
+
+@keyframes login-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  50% {
+    transform: translateX(6px);
+  }
+  75% {
+    transform: translateX(-3px);
+  }
+}
+
+.login-field {
+  animation: login-fade 250ms ease-out both;
+}
+
+.login-field:nth-child(1) {
+  animation-delay: 60ms;
+}
+
+.login-field:nth-child(2) {
+  animation-delay: 140ms;
+}
+
+@keyframes login-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-input {
+  border-radius: 0;
+  background: rgb(255 255 255 / 0.04);
+}
+
+.login-input:focus-visible {
+  outline: 1px solid var(--accent-orange);
+  outline-offset: 1px;
+}
+
+.login-eye {
+  display: inline-flex;
+  padding: 0.5rem;
+  color: var(--muted-foreground);
+}
+
+.login-submit {
+  border-radius: 0;
+  background-image: var(--gradient-sunset);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-submit::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.35), transparent);
+  transform: translateX(-100%);
+  animation: login-shine 1.2s ease-out infinite;
+}
+
+@keyframes login-shine {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.login-neon {
+  filter: drop-shadow(0 0 12px color-mix(in oklab, var(--primary) 45%, transparent));
+}
+
+/* Status-Banner (Spec 6.1). */
+.login-banner {
+  width: min(100%, 28rem);
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.login-banner-denied {
+  background: color-mix(in oklab, var(--destructive) 22%, transparent);
+  border: 1px solid var(--destructive);
+  color: var(--destructive);
+}
+
+.login-banner-welcome {
+  background-image: var(--gradient-sunset);
+  color: white;
+}
+
+.login-banner-name {
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+/* HUD (Spec 6.3). */
+.login-hud {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.login-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+
+.login-eq span {
+  width: 3px;
+  height: 100%;
+  background: var(--primary);
+  transform-origin: bottom;
+  animation: login-eq 900ms ease-in-out infinite alternate;
+}
+
+@keyframes login-eq {
+  0% {
+    transform: scaleY(0.35);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+.login-eq-still span {
+  animation: none;
+  transform: scaleY(0.35);
+}
+
+.login-marquee {
+  display: inline-block;
+  max-width: 14rem;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: login-marquee 12s linear infinite;
+}
+
+
+
+@keyframes login-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.login-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--muted-foreground);
+  border-top-color: transparent;
+  animation: login-spin 1.4s linear infinite;
+}
+
+@keyframes login-spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.login-tip {
+  animation: login-fade 250ms ease-out both;
+}
+
+/* Flash und Fade auf Schwarz. */
+.login-flash {
+  position: absolute;
+  inset: 0;
+  background: white;
+  opacity: 0.9;
+  animation: login-flash 120ms ease-out both;
+}
+
+@keyframes login-flash {
+  0% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.login-blackout {
+  position: absolute;
+  inset: 0;
+  background: black;
+  opacity: 0;
+  animation: login-fade-in 400ms ease-out both;
+}
+
+@keyframes login-fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
