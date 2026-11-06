@@ -32,9 +32,12 @@ const FADE_OUT_MS = 800;
 export function LoginScene({
   companyName,
   logoVariant,
+  notice,
 }: {
   companyName: string;
   logoVariant: LogoVariant;
+  /** Grund, warum es trotz Session nicht weitergeht (Spec 3.2). */
+  notice?: string | null;
 }) {
   const [state, dispatch] = useReducer(loginSceneReducer, { phase: "intro", banner: null });
   const music = useMusic();
@@ -112,6 +115,11 @@ export function LoginScene({
 
               <LoginCard shaking={state.banner === "denied"}>
                 <LoginForm onResult={onResult} />
+                {notice ? (
+                  <p className="text-sm text-destructive" role="alert" aria-live="polite">
+                    {notice}
+                  </p>
+                ) : null}
               </LoginCard>
 
               <StatusBanner banner={state.banner} name={name} />

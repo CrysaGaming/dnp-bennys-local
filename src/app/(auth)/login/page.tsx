@@ -2,7 +2,8 @@ import { headers } from "next/headers";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { getSessionContext } from "@/lib/dal";
+import { getLoginState, startRoute } from "@/lib/dal";
+import { loginNotice } from "@/lib/login-notice";
 import { getCompanySettings } from "@/features/company/service";
 import { LoginScene } from "./_components/login-scene";
 import { SceneFallback } from "./_components/scene-fallback";
@@ -22,14 +23,18 @@ async function Scene() {
   // als instabilen Wert (und die Szene steht doppelt im HTML).
   await connection();
 
-  const ctx = await getSessionContext(await headers());
-  if (ctx) redirect("/dashboard");
+  const state = await getLoginState(await headers());
+  if (state.kind === "context") redirect(startRoute(state.ctx));
 
   const settings = await getCompanySettings();
 
   return (
     <main className="dark login-scene bg-background text-foreground">
-      <LoginScene companyName={settings.name} logoVariant={settings.logoVariant} />
+      <LoginScene
+        companyName={settings.name}
+        logoVariant={settings.logoVariant}
+        notice={loginNotice(state)}
+      />
     </main>
   );
 }

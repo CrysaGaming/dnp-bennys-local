@@ -14,7 +14,13 @@ export * from "@tests/helpers/factories";
 export async function createLoginUser(
   username: string,
   password: string,
-  opts: { mustChangePassword?: boolean; permissions?: Permission[]; level?: number } = {},
+  opts: {
+    mustChangePassword?: boolean;
+    permissions?: Permission[];
+    level?: number;
+    /** Ohne Employee gibt es kein Mitarbeiterprofil – für die Meldung nach dem Login. */
+    employee?: boolean;
+  } = {},
 ) {
   const { user } = await auth.api.createUser({
     body: {
@@ -28,6 +34,10 @@ export async function createLoginUser(
   const rank =
     (await prisma.rank.findUnique({ where: { level: opts.level ?? 10 } })) ??
     (await createRank({ level: opts.level ?? 10, permissions: opts.permissions ?? [] }));
+
+  if (opts.employee === false) {
+    return { user: user!, employee: null, rank };
+  }
 
   const employee = await prisma.employee.create({
     data: {

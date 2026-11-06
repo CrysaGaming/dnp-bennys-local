@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { auth } from "@/lib/auth";
 import { internalEmail } from "@/lib/auth-email";
 import { prisma } from "@/lib/prisma";
-import { getSessionContext, startRoute } from "@/lib/dal";
+import { getSessionContext, getLoginState, startRoute } from "@/lib/dal";
 import { createRank, makeCtx } from "@tests/helpers/factories";
 import { signInHeaders } from "@tests/helpers/session";
 import type { Permission } from "@/generated/prisma/enums";
@@ -67,6 +67,64 @@ describe("getSessionContext", () => {
 
   it("null ohne Cookie", async () => {
     expect(await getSessionContext(new Headers())).toBeNull();
+  });
+});
+
+describe("getLoginState", () => {
+  it("User ohne Employee: Grund missing, Name für die Meldung", async () => {
+    await auth.api.createUser({
+      body: {
+        email: internalEmail("ohnekarte"),
+        password,
+        name: "Ohne Karte",
+        data: { username: "ohnekarte" },
+      },
+    });
+
+    const state = await getLoginState(await signInHeaders("ohnekarte", password));
+
+    expect(state.kind).toBe("no_profile");
+    expect(state.kind === "no_profile" ? state.reason : null).toBe("missing");
+    expect(state.kind === "no_profile" ? state.username : null).toBe("ohnekarte");
+  });
+
+  it("gekündigter Mitarbeiter: Grund terminated", async () => {
+    const { user } = await createEmployee("gina");
+    const headers = await signInHeaders("gina", password);
+
+    await prisma.employee.update({ where: { userId: user.id }, data: { status: "TERMINATED" } });
+
+    const state = await getLoginState(headers);
+
+    expect(state.kind).toBe("no_profile");
+    expect(state.kind === "no_profile" ? state.reason : null).toBe("terminated");
+  });
+
+  it("gesperrter User: Grund banned", async () => {
+    const { user } = await createEmployee("nina");
+    const headers = await signInHeaders("nina", password);
+
+    await prisma.user.update({ where: { id: user.id }, data: { banned: true } });
+
+    const state = await getLoginState(headers);
+
+    expect(state.kind).toBe("no_profile");
+    expect(state.kind === "no_profile" ? state.reason : null).toBe("banned");
+  });
+
+  it("normaler Mitarbeiter: Kontext", async () => {
+    await createEmployee("okuser");
+
+    const state = await getLoginState(await signInHeaders("okuser", password));
+
+    expect(state.kind).toBe("context");
+    expect(state.kind === "context" ? state.ctx.username : null).toBe("okuser");
+  });
+
+  it("ohne Session: kind none", async () => {
+    const state = await getLoginState(new Headers());
+
+    expect(state.kind).toBe("none");
   });
 });
 

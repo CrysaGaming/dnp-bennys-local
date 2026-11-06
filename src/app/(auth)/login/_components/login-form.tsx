@@ -51,10 +51,21 @@ export function LoginForm({ onResult }: { onResult?: (r: "success" | "error") =>
       return;
     }
 
+    const result = await startRouteAction();
+
+    // Der Login war richtig, aber ohne Mitarbeiterkarte geht es nicht weiter. Ohne diesen
+    // Zweig steht der Nutzer nach dem erfolgreichen Login still wieder auf /login.
+    if (result.notice) {
+      setError(result.notice);
+      setBusy(false);
+      onResult?.("error");
+      return;
+    }
+
     onResult?.("success");
     // Die Startroute nennt der Server: bei gesetztem Flag führt sie direkt zur
     // Passwortseite, sonst ins Dashboard.
-    router.replace(await startRouteAction());
+    router.replace(result.route);
   }
 
   return (

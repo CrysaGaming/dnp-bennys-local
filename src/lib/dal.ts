@@ -6,26 +6,33 @@ import { prisma } from "@/lib/prisma";
 import { hasPermission, withImplied } from "@/lib/permissions";
 import type { Permission } from "@/generated/prisma/enums";
 import type { SessionContext } from "./session-types";
+import type { LoginState } from "./login-notice";
 
-/**
- * Die eigentliche Sicherheitsgrenze (Spec 3.2).
- * User und Employee werden immer frisch aus der DB geladen: mit `cookieCache`
- * (5 min) würde `getSession` sonst einen veralteten Stand für gerade gesperrte
- * oder gekündigte Mitarbeiter liefern.
- */
-export async function getSessionContext(h: Headers): Promise<SessionContext | null> {
-  const session = await auth.api.getSession({ headers: h });
-  if (!session?.user) return null;
+type UserLike = {
+  id: string;
+  name: string;
+  username: string | null;
+  image: string | null;
+  role: string | null;
+  banned: boolean | null;
+};
 
-  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-  if (!user || user.banned) return null;
+type EmployeeLike = {
+  id: string;
+  userId: string;
+  mustChangePassword: boolean;
+  status: string;
+  rank: {
+    id: string;
+    name: string;
+    level: number;
+    color: string;
+    isSystem: boolean;
+    permissions: Permission[];
+  };
+};
 
-  const employee = await prisma.employee.findUnique({
-    where: { userId: user.id },
-    include: { rank: true },
-  });
-  if (!employee || employee.status !== "ACTIVE") return null;
-
+function toContext(user: UserLike, employee: EmployeeLike): SessionContext {
   return {
     userId: user.id,
     username: user.username ?? "",
@@ -43,6 +50,48 @@ export async function getSessionContext(h: Headers): Promise<SessionContext | nu
     },
     permissions: withImplied(employee.rank.permissions),
   };
+}
+
+/**
+ * Der eigentliche Blick auf den Zugriff (Spec 3.2). User und Employee werden immer frisch
+ * aus der DB geladen: mit `cookieCache` (5 min) würde `getSession` sonst einen veralteten
+ * Stand für gerade gesperrte oder gekündigte Mitarbeiter liefern.
+ *
+ * `no_profile` ist der Fall, in dem Besser Auth die Session kennt, aber keine Mitarbeiterkarte
+ * dahintersteht – gesperrt, gekündigt oder nie angelegt. Das ist kein Login-Fehler, sondern
+ * ein Grund, der genannt werden muss.
+ */
+export async function getLoginState(h: Headers): Promise<LoginState> {
+  const session = await auth.api.getSession({ headers: h });
+  if (!session?.user) return { kind: "none" };
+
+  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+  if (!user) return { kind: "none" };
+
+  if (user.banned) {
+    return { kind: "no_profile", username: user.username ?? "", reason: "banned" };
+  }
+
+  const employee = await prisma.employee.findUnique({
+    where: { userId: user.id },
+    include: { rank: true },
+  });
+
+  if (!employee) {
+    return { kind: "no_profile", username: user.username ?? "", reason: "missing" };
+  }
+
+  if (employee.status !== "ACTIVE") {
+    return { kind: "no_profile", username: user.username ?? "", reason: "terminated" };
+  }
+
+  return { kind: "context", ctx: toContext(user, employee) };
+}
+
+/** Sicherheitsgrenze: nur ein vollständiger Kontext gilt. */
+export async function getSessionContext(h: Headers): Promise<SessionContext | null> {
+  const state = await getLoginState(h);
+  return state.kind === "context" ? state.ctx : null;
 }
 
 /** Pro Request genau einmal geladen (React `cache`). */

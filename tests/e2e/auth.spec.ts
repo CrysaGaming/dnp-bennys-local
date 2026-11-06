@@ -27,8 +27,18 @@ test("gesperrter User kommt nicht rein", async ({ page }) => {
   await expect(page.getByText("Dein Zugang ist gesperrt.")).toBeVisible();
 });
 
+test("User ohne Mitarbeiterkarte sieht die Meldung", async ({ page }) => {
+  await createLoginUser("kartelos", "Start-Passwort-123", { employee: false });
+
+  await loginAs(page, "kartelos", "Start-Passwort-123");
+
+  // Vor dem Fix: Login erfolgreich, aber still auf /login zurück – der Nutzer sieht nichts.
+  await expect(page.getByText("Kein Mitarbeiterprofil gefunden.")).toBeVisible();
+  await expect(page).toHaveURL(/\/login$/);
+});
+
 test("erzwingt Passwortwechsel beim ersten Login", async ({ page }) => {
-  const { employee } = await createLoginUser("neu", "Start-Passwort-123", {
+  const { user } = await createLoginUser("neu", "Start-Passwort-123", {
     mustChangePassword: true,
   });
 
@@ -42,7 +52,7 @@ test("erzwingt Passwortwechsel beim ersten Login", async ({ page }) => {
   await page.getByRole("button", { name: "Passwort ändern" }).click();
 
   await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(prisma.employee.findUniqueOrThrow({ where: { id: employee.id } })).resolves.toMatchObject({
+  await expect(prisma.employee.findUniqueOrThrow({ where: { userId: user.id } })).resolves.toMatchObject({
     mustChangePassword: false,
   });
 });
