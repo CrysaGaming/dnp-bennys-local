@@ -41,9 +41,9 @@ npm run dev            # Entwicklungsserver
 npm run typecheck      # tsc --noEmit
 npm run lint           # ESLint
 npm run test:unit      # Vitest: Projekte unit + ui
-npm run test:int       # Vitest: integration gegen Test-DB (Port 5433)
+npm run test:int       # Vitest: integration gegen Test-DB (Port 5435)
 npm run test:e2e       # Playwright gegen Produktions-Build
-npm run db:up          # Postgres-Container (dev 5432, test 5433)
+npm run db:up          # Postgres-Container (dev 5434, test 5435)
 npm run db:migrate     # prisma migrate dev
 npm run db:seed        # Seed gegen Dev-DB
 npm run db:test:reset  # Test-DB zurücksetzen
