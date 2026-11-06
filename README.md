@@ -58,6 +58,8 @@ permissions, format, errors, audit, storage).
 - Logo-Entwürfe: `docs/brand/logo-entwuerfe/`
 - Regeln für KI-Agenten: `AGENTS.md`
 - Bilder der Login-Seite mit Fotograf und Quelle: `public/login/CREDITS.md`
+- Lizenzen der Materialien: `LICENSES/third-party.md`
+- Deploy-Checkliste: `docs/deploy/coolify.md`
 
 Deployment über Coolify auf dem eigenen VPS macht der Projektinhaber manuell.
 
