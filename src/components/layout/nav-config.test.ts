@@ -36,6 +36,13 @@ describe("nav-config", () => {
     ).toContain("Ressourcen");
   });
 
+  it("Admin sieht in der Verwaltung Firma und Audit-Log", () => {
+    const admin = visibleNav(NAV_GROUPS, fakeCtx({ isAdmin: true }));
+    const verwaltung = admin.find((g) => g.title === "Verwaltung")!;
+
+    expect(verwaltung.items.map((i) => i.title)).toEqual(["Firma", "Audit-Log"]);
+  });
+
   it("jeder Eintrag hat Titel, Href und Icon", () => {
     for (const group of NAV_GROUPS) {
       for (const item of group.items) {

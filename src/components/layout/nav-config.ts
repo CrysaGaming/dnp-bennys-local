@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Package,
   Receipt,
+  ScrollText,
   Shield,
   SlidersHorizontal,
   Tags,
@@ -65,7 +66,10 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     title: "Verwaltung",
-    items: [{ title: "Firma", href: "/einstellungen/firma", icon: Building2, permission: "COMPANY_MANAGE" }],
+    items: [
+      { title: "Firma", href: "/einstellungen/firma", icon: Building2, permission: "COMPANY_MANAGE" },
+      { title: "Audit-Log", href: "/audit", icon: ScrollText, permission: "AUDIT_VIEW" },
+    ],
   },
 ];
 
