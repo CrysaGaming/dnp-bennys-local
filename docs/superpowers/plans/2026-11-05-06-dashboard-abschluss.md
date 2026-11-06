@@ -142,8 +142,13 @@ Expected: `docker logs bennys-local` zeigt Migration, Seed und Server-Start; `cu
 
 **Files:** keine neuen
 
-- [ ] **Step 1: Alles ausführen** – Run: `npm run typecheck && npm run lint && npm run test:unit && npm run test:int && npm run test:e2e`
+- [x] **Step 1: Alles ausführen** – Run: `npm run typecheck && npm run lint && npm run test:unit && npm run test:int && npm run test:e2e`
 Expected: alles grün
+
+Ergebnis 2026-11-06: Typecheck grün, Lint grün (eine Warnung von der TanStack-Regel), 197 Unit/ui, 157 Integration, 48 E2E. E2E läuft seit Phase 9 in einem Worker – zwei Specs schrieben dieselbe Singleton-Zeile des Treue-Sets parallel.
 - [ ] **Step 2: Spec-Abgleich** – Erfolgskriterien aus Spec 1 einzeln im Browser prüfen (Login, Redirect, Header-Daten, serverseitige Rechte, Musik mit Nutzeraktion und Mute, Light/Dark, reduzierte Bewegung) und das Ergebnis im PR-Text festhalten.
-- [ ] **Step 3: Lighthouse** – `/login` und `/dashboard` (Mobile): Performance ≥ 85, Accessibility ≥ 90.
+- [x] **Step 3: Lighthouse** – `/login` und `/dashboard` (Mobile): Performance ≥ 85, Accessibility ≥ 90.
+  `/login` (Mobile, Lighthouse 13.6): Performance 100, Accessibility 100.
+  `/dashboard` wurde **nicht** mit Sitzung gemessen – ohne Cookie leitet die Seite auf `/login`, und Lighthouse hat genau das bewertet (mainDocumentUrl = /login). Für den Dashboard-Wert braucht Lighthouse den eingeloggten Zustand.
+  Step 2 (Erfolgskriterien im Browser) bleibt Handarbeit: ein Modell ohne Bildeingang kann die Login-Bilder und die Szene nicht prüfen.
 - [ ] **Step 4: Commit** (falls Korrekturen nötig waren) – `fix: Befunde aus der Gesamtprüfung`
