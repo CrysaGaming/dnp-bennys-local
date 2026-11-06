@@ -7,7 +7,9 @@ import { expect } from "@playwright/test";
  * gewartet – drücken, bis das Formular wirklich da ist.
  */
 export async function startScene(page: Page): Promise<void> {
-  await expect(page.getByText("DRÜCKE EINE TASTE ODER KLICKE")).toBeVisible();
+  // Der Szene-Inhalt wird gestreamt. Direkt nach dem Laden kann die Kopie im
+  // versteckten Suspense-Container noch im DOM stehen – die sichtbare Instanz ist die erste.
+  await expect(page.getByText("DRÜCKE EINE TASTE ODER KLICKE").first()).toBeVisible();
 
   await expect(async () => {
     await page.keyboard.press("Enter");

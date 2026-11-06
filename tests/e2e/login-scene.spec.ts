@@ -9,7 +9,7 @@ test.describe("Login-Szene", () => {
   test("Intro, dann Formular", async ({ page }) => {
     await page.goto("/login");
 
-    await expect(page.getByText("DRÜCKE EINE TASTE ODER KLICKE")).toBeVisible();
+    await expect(page.getByText("DRÜCKE EINE TASTE ODER KLICKE").first()).toBeVisible();
 
     await startScene(page);
   });
