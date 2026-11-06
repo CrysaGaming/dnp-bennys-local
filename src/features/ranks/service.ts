@@ -192,3 +192,12 @@ export async function deleteRank(ctx: SessionContext, id: string): Promise<void>
 }
 
 export type { RankInput };
+
+/** Ränge, die der Kontext selbst verwalten darf – für die Auswahl im Mitarbeiterformular. */
+export async function ranksBelowOwn(ctx: SessionContext): Promise<RankRow[]> {
+  assertPermission(ctx, "RANKS_MANAGE");
+
+  const ranks = await listRanks(ctx);
+
+  return ranks.filter((rank) => rank.isSystem || rank.level < ctx.rank.level);
+}
