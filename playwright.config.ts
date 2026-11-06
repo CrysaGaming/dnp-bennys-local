@@ -28,6 +28,8 @@ export default defineConfig({
       SEED_RADIO_CHANNEL: "1234",
       SEED_RADIO_PASSWORD: "0000",
       UPLOAD_DIR: "./tmp/uploads-e2e",
+      NEXT_PUBLIC_MUSIC_SRC: "/audio/silence-1s.wav",
+      BETTER_AUTH_RATE_LIMIT: "off",
     },
   },
 });
