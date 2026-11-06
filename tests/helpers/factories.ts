@@ -129,3 +129,21 @@ export async function createEmployeeForRank(rankId: string) {
     data: { userId: user.id, rankId, serviceNumber: (await prisma.employee.count()) + 1 },
   });
 }
+
+export async function createPart(data: Partial<Prisma.PartCreateInput> = {}) {
+  return prisma.part.create({
+    data: { name: `Teil ${randomUUID().slice(0, 8)}`, ...data },
+  });
+}
+
+export async function createPriceCategory(data: Partial<Prisma.PriceCategoryCreateInput> = {}) {
+  return prisma.priceCategory.create({
+    data: { name: `Kategorie ${randomUUID().slice(0, 8)}`, ...data },
+  });
+}
+
+export async function createPriceItem(data: Prisma.PriceListItemUncheckedCreateInput) {
+  return prisma.priceListItem.create({
+    data: { ...data, name: data.name ?? `Leistung ${randomUUID().slice(0, 8)}` },
+  });
+}
