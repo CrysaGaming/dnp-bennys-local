@@ -35,6 +35,9 @@
 
   --gradient-sunset: linear-gradient(90deg, oklch(0.662 0.2444 1.68), oklch(0.75 0.1668 50.54));
 
+  /* Der Header ist volle Breite (Spec 5.1) – die Sidebar beginnt darunter. */
+  --header-height: 4rem;
+
   --radius: 0.75rem;
 }
 

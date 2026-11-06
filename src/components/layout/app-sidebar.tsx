@@ -31,7 +31,16 @@ export function AppSidebar({
   }));
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar
+      collapsible="icon"
+      // shadcn setzt den Sidebar-Container auf den ganzen Viewport (fixed inset-y-0).
+      // Der Header läuft jetzt über die volle Breite, also beginnt die Sidebar darunter.
+      // Inline, weil die Utility-Klassen für inset-y und Höhe gegeneinander arbeiten.
+      style={{
+        top: "var(--header-height)",
+        height: "calc(100svh - var(--header-height))",
+      }}
+    >
       <SidebarHeader>
         <Link href="/dashboard" className="flex items-center gap-2">
           <BrandLogo variant="EMBLEM" layout="compact" companyName={companyName} className="h-8" />

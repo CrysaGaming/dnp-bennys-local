@@ -36,7 +36,7 @@ export function AppHeader({ ctx, settings, status, actions }: AppHeaderProps) {
   );
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 bg-background/70 px-4 backdrop-blur-xl sm:px-6">
+    <header className="sticky top-0 z-30 relative flex h-[var(--header-height)] items-center gap-4 bg-background/70 px-4 backdrop-blur-xl sm:px-6">
       <div className="flex items-center gap-4">
         {/* Auf dem Handy ist links der Burger für die Sidebar (Spec 5.2). */}
         <span className="flex md:hidden">
@@ -84,7 +84,7 @@ export function AppHeader({ ctx, settings, status, actions }: AppHeaderProps) {
         />
       </div>
 
-      <span aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-sunset" />
+      <span aria-hidden data-slot="sunset-line" className="absolute inset-x-0 bottom-0 h-px bg-sunset" />
     </header>
   );
 }

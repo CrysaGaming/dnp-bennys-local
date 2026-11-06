@@ -11,7 +11,7 @@ import { NAV_GROUPS, visibleNav } from "@/components/layout/nav-config";
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { AppFooter } from "@/components/layout/app-footer";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 /**
  * Shell der Portalrouten: Sidebar, Header, Content, Footer. Alles, was den Session-Leser
@@ -27,13 +27,8 @@ async function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <AppSidebar
-        groups={visibleNav(NAV_GROUPS, ctx)}
-        companyName={settings.name}
-        footer={<ClockCard openSince={openEntry?.clockIn ?? null} />}
-      />
-
-      <SidebarInset className="min-h-dvh">
+      <div className="flex min-h-dvh w-full flex-col">
+        {/* Der Header läuft über die ganze Breite (Spec 5.1) – die Sidebar beginnt darunter. */}
         <AppHeader
           ctx={ctx}
           settings={settings}
@@ -46,12 +41,22 @@ async function Shell({ children }: { children: React.ReactNode }) {
           }
         />
 
-        <div className="w-full max-w-screen-2xl px-4 py-4 sm:px-6 sm:py-6">
-          {children}
-        </div>
+        <div className="flex w-full flex-1">
+          <AppSidebar
+            groups={visibleNav(NAV_GROUPS, ctx)}
+            companyName={settings.name}
+            footer={<ClockCard openSince={openEntry?.clockIn ?? null} />}
+          />
 
-        <AppFooter companyName={settings.name} />
-      </SidebarInset>
+          <main className="flex w-full flex-1 flex-col">
+            <div className="w-full max-w-screen-2xl px-4 py-4 sm:px-6 sm:py-6">
+              {children}
+            </div>
+
+            <AppFooter companyName={settings.name} />
+          </main>
+        </div>
+      </div>
     </SidebarProvider>
   );
 }

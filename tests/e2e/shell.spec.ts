@@ -14,6 +14,26 @@ test.describe("Portal-Shell", () => {
     await expect(page.getByText("Funk 1234 (0000)")).toBeVisible();
   });
 
+  test("Header läuft über die ganze Breite", async ({ page }) => {
+    await page.goto("/dashboard");
+
+    const headerBox = await page.getByRole("banner").boundingBox();
+    const viewport = page.viewportSize();
+    const sidebarBox = await page.locator('[data-slot="sidebar-container"]').boundingBox();
+
+    expect(headerBox?.width).toBe(viewport?.width);
+    // Die Sunset-Linie gehört zum Header und muss über die ganze Breite laufen (Spec 5.2).
+    const lineBox = await page.getByRole("banner").locator('[data-slot="sunset-line"]').boundingBox();
+    expect(lineBox?.width).toBe(viewport?.width);
+    // Die Linie ist 1 px hoch und sitzt auf der unteren Kante – in der Box zählte der
+    // Pixel vor der Kante, nicht der danach.
+    expect(lineBox!.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height - 1);
+    expect(lineBox!.y).toBeLessThanOrEqual(headerBox!.y + headerBox!.height);
+
+    // Die Sidebar darf nicht hinter dem Header beginnen.
+    expect(sidebarBox?.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height);
+  });
+
   test("Theme-Umschalter", async ({ page }) => {
     // next-themes liest den Wert vor dem ersten Render – so ist der Startzustand klar.
     await page.addInitScript(() => window.localStorage.setItem("theme", "dark"));
