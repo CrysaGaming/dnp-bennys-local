@@ -3,6 +3,8 @@ import { requireSession } from "@/lib/dal";
 import { getCompanySettings } from "@/features/company/service";
 import { getCompanyStatus } from "@/lib/company-status";
 import { getMusicPreference } from "@/features/account/service";
+import { getOpenEntry } from "@/features/time/service";
+import { ClockCard } from "@/features/time/components/clock-card";
 import { MusicAutoResume } from "@/components/music/music-auto-resume";
 import { MusicToggle } from "@/components/layout/music-toggle";
 import { NAV_GROUPS, visibleNav } from "@/components/layout/nav-config";
@@ -21,10 +23,15 @@ async function Shell({ children }: { children: React.ReactNode }) {
   const settings = await getCompanySettings();
   const status = await getCompanyStatus();
   const music = await getMusicPreference(ctx);
+  const openEntry = await getOpenEntry(ctx);
 
   return (
     <SidebarProvider>
-      <AppSidebar groups={visibleNav(NAV_GROUPS, ctx)} companyName={settings.name} />
+      <AppSidebar
+        groups={visibleNav(NAV_GROUPS, ctx)}
+        companyName={settings.name}
+        footer={<ClockCard openSince={openEntry?.clockIn ?? null} />}
+      />
 
       <SidebarInset className="min-h-dvh">
         <AppHeader
