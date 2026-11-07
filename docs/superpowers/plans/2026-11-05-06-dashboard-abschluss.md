@@ -33,7 +33,7 @@ Kein Punkt aus der Übersicht. Zusätzlich abgedeckt: Umsatz kurz nach Mitternac
   - `getOnDutyList(now: Date): Promise<Array<{ employeeId: string; name: string; image: string | null; rankColor: string; minutes: number }>>`
   - `getRecentOrders(limit: number): Promise<Array<{ number: number; customer: string; plate: string | null; status: OrderStatus; total: number; createdAt: Date }>>`
 
-- [ ] **Step 1: Failing Tests**
+- [x] **Step 1: Failing Tests**
 
 ```ts
 // days.test.ts
@@ -47,10 +47,10 @@ expect(lastNDaysBerlin(7, new Date("2026-11-05T12:00:00Z")).map((d) => d.label))
 - `lowStockParts` zählt Teile mit `stock < minStock`
 - `getRevenueLast7Days` liefert 7 Einträge, fehlende Tage mit 0
 
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren** – Tagesgrenzen über `Intl.DateTimeFormat` mit `timeZone: "Europe/Berlin"`, Summen per Prisma `aggregate` bzw. `groupBy`.
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(dashboard): Kennzahlen-Abfragen`
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren** – Tagesgrenzen über `Intl.DateTimeFormat` mit `timeZone: "Europe/Berlin"`, Summen per Prisma `aggregate` bzw. `groupBy`.
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(dashboard): Kennzahlen-Abfragen`
 
 ### Task 10.2: Dashboard-Oberfläche
 
@@ -61,17 +61,17 @@ expect(lastNDaysBerlin(7, new Date("2026-11-05T12:00:00Z")).map((d) => d.label))
 **Interfaces:**
 - Consumes: Abfragen aus Task 10.1, `formatMoney`, `formatDuration`
 
-- [ ] **Step 1: Failing Tests**
+- [x] **Step 1: Failing Tests**
   - `count-up.test.tsx`: `<CountUp value={1200} format={formatMoney} />` zeigt nach Ablauf (fake timers, 800 ms) „$1.200“; bei reduzierter Bewegung sofort „$1.200“
   - `dashboard.spec.ts`: Factory legt 2 offene Aufträge und ein knappes Teil an → Karten „Offene Aufträge“ = 2 und „Lager“ = „1 knapp“ sichtbar; Tabelle „Letzte Aufträge“ zeigt die Auftragsnummern
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren** nach Spec 5.1 und 4.3:
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren** nach Spec 5.1 und 4.3:
   - KPI-Karten mit Hover-Lift.
   - Umsatz-Chart 7 Tage im Sunset-Verlauf.
   - Liste „Gerade im Dienst“ mit Avatar und Dauer.
   - „Letzte Aufträge“: 10 Einträge, Link zur Detailseite.
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(dashboard): Dashboard mit KPIs, Chart und Listen`
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(dashboard): Dashboard mit KPIs, Chart und Listen`
 
 ### Task 10.3: Audit-Log-Ansicht
 
@@ -84,16 +84,16 @@ expect(lastNDaysBerlin(7, new Date("2026-11-05T12:00:00Z")).map((d) => d.label))
   - `encodeCursor(c: { createdAt: Date; id: string }): string`, `decodeCursor(s: string): { createdAt: Date; id: string } | null` (base64url-JSON, ungültig → `null`)
   - `listAudit(ctx, q: { entity?: string; actorId?: string; from?: Date; to?: Date; cursor?: string; limit?: number }): Promise<{ rows: AuditRow[]; nextCursor: string | null }>` (`AUDIT_VIEW`, Standard-Limit 50, sortiert nach `createdAt desc, id desc`)
 
-- [ ] **Step 1: Failing Tests**
+- [x] **Step 1: Failing Tests**
   - `cursor.test.ts`: Hin- und Rückweg ergibt dieselben Werte; `decodeCursor("kaputt")` → `null`
   - `audit-view.test.ts`: 120 Einträge → Seite 1 hat 50 und einen `nextCursor`, Seite 3 hat 20 und `nextCursor: null`; keine Überschneidung zwischen den Seiten; Filter `entity: "Resource"` liefert nur solche; ohne `AUDIT_VIEW` → `ForbiddenError`
   - `nav-config.test.ts` ergänzen: Admin sieht in „Verwaltung“ die Einträge `["Firma", "Audit-Log"]`
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren**
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren**
   - Tabellenspalten: Zeit, Person, Aktion, Objekt, Details. Die Details zeigen vorher/nachher als ausklappbaren JSON-Diff.
   - „Weitere laden“ über `?cursor=`.
-- [ ] **Step 4: Ausführen** → PASS
-- [ ] **Step 5: Commit** – `feat(audit): Audit-Log-Ansicht`
+- [x] **Step 4: Ausführen** → PASS
+- [x] **Step 5: Commit** – `feat(audit): Audit-Log-Ansicht`
 
 ### Task 10.4: Security-Header
 
@@ -108,11 +108,17 @@ expect(lastNDaysBerlin(7, new Date("2026-11-05T12:00:00Z")).map((d) => d.label))
   - `X-Content-Type-Options: nosniff`
   - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
 
-- [ ] **Step 1: Failing E2E** – `const res = await request.get("/login"); expect(res.headers()["content-security-policy"]).toContain("frame-ancestors 'none'"); expect(res.headers()["content-security-policy"]).toContain("media-src 'self'"); expect(res.headers()["referrer-policy"]).toBe("strict-origin-when-cross-origin");`
-- [ ] **Step 2: Ausführen** → FAIL
-- [ ] **Step 3: Implementieren** über `headers()` in `next.config.ts`
-- [ ] **Step 4: Ausführen** – Run: `npm run test:e2e` → alle PASS. Mit offener DevTools-Konsole auf Login, Dashboard und Logo-Vorschau prüfen: keine CSP-Verstöße (Fonts laufen über `next/font` lokal, das passt zu `font-src 'self'`).
-- [ ] **Step 5: Commit** – `feat(security): Security-Header`
+- [x] **Step 1: Failing E2E** – `const res = await request.get("/login"); expect(res.headers()["content-security-policy"]).toContain("frame-ancestors 'none'"); expect(res.headers()["content-security-policy"]).toContain("media-src 'self'"); expect(res.headers()["referrer-policy"]).toBe("strict-origin-when-cross-origin");`
+- [x] **Step 2: Ausführen** → FAIL
+- [x] **Step 3: Implementieren** über `headers()` in `next.config.ts`
+- [x] **Step 4: Ausführen** – Run: `npm run test:e2e` → alle PASS. Mit offener DevTools-Konsole auf Login, Dashboard und Logo-Vorschau prüfen: keine CSP-Verstöße (Fonts laufen über `next/font` lokal, das passt zu `font-src 'self'`).
+  Lauf 2026-11-07: auf `/login` war ein CSP-Verstoß (`kEvalViolation`) – Zod v4 prüft mit `Function("")`, ob es
+  kompilieren darf. Behoben in `src/lib/zod.ts` mit `z.config({ jitless: true })`; die Fachmodule importieren `z`
+  daraus. Danach Konsole leer auf `/login`, `/dashboard` und `/einstellungen/firma` (Logo-Vorschau).
+  Der Guard steht in `tests/e2e/security-headers.spec.ts`: Playwright meldet CSP-Verstöße nicht in der Konsole
+  (DevTools zeigt sie nur im Issues-Panel), darum zählt der Test die `Function`-Aufrufe im Browser – rot mit 1,
+  grün mit 0.
+- [x] **Step 5: Commit** – `feat(security): Security-Header`
 
 ### Task 10.5: Deploy-Vorbereitung
 
@@ -123,20 +129,20 @@ expect(lastNDaysBerlin(7, new Date("2026-11-05T12:00:00Z")).map((d) => d.label))
 **Interfaces:**
 - Consumes: Spec 13 komplett
 
-- [ ] **Step 1: Image lokal komplett prüfen**
+- [x] **Step 1: Image lokal komplett prüfen**
 
 Run: `npm run db:test:reset && docker build -t bennys-portal:local .`
 Run: `docker run --rm -d --name bennys-local -p 3200:3000 -e DATABASE_URL=postgresql://bennys:bennys@host.docker.internal:5433/bennys_test -e BETTER_AUTH_SECRET=lokaler-test-secret-mit-32-zeichen! -e BETTER_AUTH_URL=http://localhost:3200 -e SEED_ADMIN_USERNAME=admin -e SEED_ADMIN_PASSWORD=Start-Passwort-123 -e SEED_RADIO_CHANNEL=1234 -e SEED_RADIO_PASSWORD=0000 -e UPLOAD_DIR=/app/uploads bennys-portal:local`
 Expected: `docker logs bennys-local` zeigt Migration, Seed und Server-Start; `curl -s localhost:3200/api/health` → `{"status":"ok","db":"ok"}`; im Browser Login mit `admin`, Passwortwechsel, Dashboard sichtbar, Avatar-Upload klappt. Danach `docker stop bennys-local`.
 
-- [ ] **Step 2: Checkliste schreiben** – `docs/deploy/coolify.md` aus Spec 13.1–13.6 als abhakbare Liste:
+- [x] **Step 2: Checkliste schreiben** – `docs/deploy/coolify.md` aus Spec 13.1–13.6 als abhakbare Liste:
   - Projekt anlegen, PostgreSQL mit Backups, Application aus Public Repository mit Build Pack Dockerfile und Port 3000.
   - Domain und DNS-A-Record, Umgebungsvariablen (Tabelle 13.3, nur Runtime), Persistent Storage `/app/uploads`, Health Check `/api/health`.
   - Webhook für Auto-Deploy, Restore-Test.
   - Hinweis zum öffentlichen Repo (13.5).
-- [ ] **Step 3: Lizenzen** – `LICENSES/third-party.md` mit den vollen Texten von MIT (Tabler Icons), ISC (Lucide) und dem Hinweis auf die SIL OFL 1.1 (Anton, Pacifico, Geist) sowie die Unsplash- und Pexels-Lizenz für die Bilder (Verweis auf `public/login/CREDITS.md`).
-- [ ] **Step 4: README** – kurz: Zweck, lokale Einrichtung (`npm ci`, `.env` aus `.env.example`, `npm run db:up`, `npm run db:migrate`, `npm run db:seed`, `npm run dev`), Tests, Verweis auf Spec, Pläne und Deploy-Checkliste.
-- [ ] **Step 5: Commit** – `docs: Deploy-Checkliste, Lizenzen und README`
+- [x] **Step 3: Lizenzen** – `LICENSES/third-party.md` mit den vollen Texten von MIT (Tabler Icons), ISC (Lucide) und dem Hinweis auf die SIL OFL 1.1 (Anton, Pacifico, Geist) sowie die Unsplash- und Pexels-Lizenz für die Bilder (Verweis auf `public/login/CREDITS.md`).
+- [x] **Step 4: README** – kurz: Zweck, lokale Einrichtung (`npm ci`, `.env` aus `.env.example`, `npm run db:up`, `npm run db:migrate`, `npm run db:seed`, `npm run dev`), Tests, Verweis auf Spec, Pläne und Deploy-Checkliste.
+- [x] **Step 5: Commit** – `docs: Deploy-Checkliste, Lizenzen und README`
 
 ### Task 10.6: Gesamtprüfung
 
