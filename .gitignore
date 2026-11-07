@@ -42,6 +42,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Projekt (Benny's Portal)
+# Der Song kommt nicht ins Repo (Spec 6.4) – nur die Stille für die Tests.
+/public/audio/*.mp3
 /src/generated/
 /uploads/
 /tmp/
