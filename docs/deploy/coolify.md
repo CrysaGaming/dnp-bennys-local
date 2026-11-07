@@ -135,3 +135,27 @@ Zwei Fallen dabei:
   weiter nutzen ⇒ die App kommt nicht mehr auf die DB. Volume neu anlegen oder das Passwort nehmen, mit
   dem es inicialisiert wurde.
 - Ohne `SEED_ADMIN_*` läuft der Seed still durch und es gibt keinen Admin. Dann kann niemand rein.
+
+### Was an den Dateien geändert ist (nach den Vorbildern vam-system und homestate-portal)
+
+- `docker-compose.yml` im Root, weil Coolify das Repo im Root scannt und nur diesen Namen erkennt.
+  Die Dev-Datei für die lokalen Datenbanken heißt `docker-compose.dev.yml` (`npm run db:up`).
+- Required-Variablen mit `:?` statt leer: `POSTGRES_PASSWORD`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`,
+  `SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD`. Fehlt eine, bricht Compose sofort mit dem Namen –
+  nicht erst mit einem mysteriösen unhealthy-Container. Für Funk-Kanal und Funk-Passwort stehen
+  Platzhalter drin (`1234`, `0000`), weil die in Firmeneinstellungen gesetzt werden.
+- Healthchecks für beide Dienste, `restart: unless-stopped`, benannte Volumes (`pgdata`, `uploads`) –
+  das Muster aus vam-system. Der App-Healthcheck geht auf `127.0.0.1`, nicht auf `localhost`.
+- `ENV HOSTNAME=0.0.0.0` im Runner, wie in homestate-portal. Ohne das bindet der Standalone-Server an
+  die Container-ID und der Healthcheck läuft ins Leere.
+- `RUN mkdir -p /app/uploads && chown -R app:app /app/uploads` – Volume-Rechte.
+
+Nachprüfung, beide Fälle:
+
+```
+docker compose -p testohne -f docker-compose.yml config
+→ required variable POSTGRES_PASSWORD is missing a value: POSTGRES_PASSWORD fehlt – in Coolify unter Variables setzen
+
+docker compose --env-file <test-env> -p deployp -f docker-compose.yml up -d --build
+→ deployp-app-1 Up (healthy), deployp-db-1 Up (healthy), /api/health {"status":"ok","db":"ok"}
+```
