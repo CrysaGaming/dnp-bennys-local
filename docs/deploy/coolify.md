@@ -105,3 +105,33 @@ Login über die API läuft, `touch /app/uploads/probe` als `app` ✓.
 In dieser Datei stehen nur Variablen**namen** (`${BETTER_AUTH_SECRET}` und so weiter) – die Werte kommen
 aus Coolify. Ohne Variable bleibt sie leer, der Seed erzeugt dann keinen Admin (CDD 29). Ohne `ports:`
 geht der Zugriff in Coolify über den Proxy; für plain `docker compose` muss eine Port-Mapping dazu.
+
+### Der fehlgeschlagene Deploy vom 2026-11-07 (14:58) – Ursache waren die Variablen
+
+Der Build lief durch, die Compose-Datei war richtig. Fehlt war nur das Passwort: Coolify hatte keine
+Variablen gesetzt, und `docker compose` hat jede einzelne mit einer leeren String ersetzt. Die Postgres
+Initialisierung verweigert das:
+
+```
+database is uninitialized and superuser password is not specified
+```
+
+Daher: `db` → unhealthy → `dependency failed to start` → Abbruch. Nachgebaut mit leerer Env-Datei,
+gleicher Fehler (`lereadb-db-1 Restarting (1)`).
+
+Diese Namen müssen in Coolify unter **Variables** stehen (die Datei enthält nur die Namen, nie die Werte):
+
+- `POSTGRES_PASSWORD`
+- `BETTER_AUTH_SECRET`
+- `BETTER_AUTH_URL` – die echte Domain, sonst setzen die Cookies falsch
+- `SEED_ADMIN_USERNAME`
+- `SEED_ADMIN_PASSWORD`
+- `SEED_RADIO_CHANNEL`
+- `SEED_RADIO_PASSWORD`
+
+Zwei Fallen dabei:
+
+- Ein Volume, das mit einem anderen Passwort angelegt wurde, behält das alte. Passwort ändern und Volume
+  weiter nutzen ⇒ die App kommt nicht mehr auf die DB. Volume neu anlegen oder das Passwort nehmen, mit
+  dem es inicialisiert wurde.
+- Ohne `SEED_ADMIN_*` läuft der Seed still durch und es gibt keinen Admin. Dann kann niemand rein.
