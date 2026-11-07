@@ -163,10 +163,12 @@ Nachlauf 2026-11-07 nach den zwei Fixes aus Step 3: Typecheck grün, Lint grün 
 
   - `/login` (ohne Sitzung): Performance **100**, Accessibility **100**. FCP 1,23 s, SI 1,49 s, TBT 62 ms,
     TTI 3,49 s, LCP 1,23 s, CLS 0.
-  - `/dashboard` (mit Sitzung, Login über `/api/auth/sign-in/username`, Cookie per CDP gesetzt):
-    Performance **98**, Accessibility **100**. FCP 1,71 s, SI 2,35 s, TBT 112 ms, TTI 4,08 s, LCP 1,71 s, CLS 0.
+  - `/dashboard` (mit Sitzung, Login über den echten Endpunkt `/api/auth/sign-in/username`, Cookie per
+    CDP auf Browserebene gesetzt): Performance **97–98** (über mehrere Läufe), Accessibility **100**.
+    FCP 1,71 s, SI 2,35 s, TBT 112 ms, TTI 4,08 s, LCP 1,71 s, CLS 0.
 
-  Zwei Befunde aus dem Lauf, beide behoben (Commit `fix: Befunde aus der Gesamtprüfung`):
+  Zwei Befunde aus dem Lauf, beide behoben (Commits `fix(dashboard): Chart-Container braucht eine Rolle für den
+  aria-label` und `fix(csp): Zod im jitless-Modus – die CSP erlaubt keine neue Function`):
 
   1. **`aria-prohibited-attr` im Dashboard-Chart.** `aria-label` auf einem `div` ohne Rolle wird von axe
      verworfen – der Name kam bei 96 durch, aber der Chart war für Screenreader nicht benannt.
@@ -192,7 +194,7 @@ Nachlauf 2026-11-07 nach den zwei Fixes aus Step 3: Typecheck grün, Lint grün 
   Sitzung leer sein.
 
   Der Lauf läuft jetzt mit `scripts/audit.mjs` (echter Chrome über chrome-launcher, `--headless=new`, Fenster
-  412×823, Mobile-Emulation, simulates Throttling). Zwei Fehler darin waren die eigentliche Ursache für den
+  412×823, Mobile-Emulation, simuliertem Throttling). Zwei Fehler darin waren die eigentliche Ursache für den
   ausbleibenden Dashboard-Wert:
   1. `lighthouse(url, opts, flags)` – die Signatur ist `lighthouse(url, flags, config)`. Mit der falschen
      Reihenfolge kam `No artifacts were defined on the config`, und der LHR liegt in Lighthouse 13.6 unter
