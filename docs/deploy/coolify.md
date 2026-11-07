@@ -64,3 +64,22 @@ Bei einem privaten Repo richtet Coolify den Webhook selbst ein.
 - [ ] Funk-Kanal und Funk-Passwort in den Firmeneinstellungen gesetzt (die Seed-Werte sind nur
       Startwerte).
 - [ ] `BETTER_AUTH_URL` passt: Cookies laufen über die echte Domain.
+
+### Der Upload-Ordner im Container (Fehlerquelle, behoben 2026-11-07)
+
+Der Container läuft als Benutzer `app`, aber ein Docker-Volume auf `/app/uploads` erbt die Rechte des
+Bildes beim ersten Anlegen. Ohne `mkdir` + `chown` im Dockerfile gehört das Volume root: Login und
+Dashboard laufen, nur der Avatar-Upload gibt 500. Lokal fällt das nicht auf, weil `UPLOAD_DIR` dort auf
+`./tmp/uploads` zeigt. Im Dockerfile steht jetzt:
+
+```docker
+RUN mkdir -p /app/uploads && chown -R app:app /app/uploads
+```
+
+Nachprüfung mit einem frischen Volume (Compose: `app` + `db`, `depends_on` mit Healthcheck):
+`ls -ld /app/uploads` → `drwxr-xr-x app app`, `touch /app/uploads/probe` als `app` ✓.
+
+Das `docker-compose.yml` im Repo ist nur für die lokalen Datenbanken (5434 Dev, 5435 Test) und fährt keinen
+App-Container – in Coolify ist die Postgres eine eigene Ressource, die App kommt aus dem Dockerfile. Wer
+die App über Compose fährt, muss `DATABASE_URL` auf `postgresql://bennys:bennys@db:5432/bennys` setzen und
+das Volume auf `/app/uploads` hängen.

@@ -45,6 +45,11 @@ RUN ln -s ../tools/node_modules/prisma ./node_modules/prisma && \
 COPY --from=build /app/docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
 
+# Der Upload-Ordner muss dem Container-Benutzer gehören: ein Docker-Volume erbt die Rechte des
+# Bildes beim ersten Anlegen. Ohne diesen Schritt gehört es root, und der Avatar-Upload läuft in 500
+# – lokal ist er grün, weil `UPLOAD_DIR` auf ./tmp/uploads zeigt.
+RUN mkdir -p /app/uploads && chown -R app:app /app/uploads
+
 USER app
 EXPOSE 3000
 ENTRYPOINT ["./docker-entrypoint.sh"]
