@@ -274,3 +274,26 @@ verdecken – darum ist es raus.
 
 Nachprüfung: Build mit dem Datei im Image, `/audio/strassen-im-blut.mp3` → 200, 3.230.109 Bytes, Health grün. Musik startet trotzdem nie ohne Nutzeraktion (Spec 6.4) – erst Taste oder
 Klick, und der Schalter muss an sein.
+
+### Der Restart-Loop durch den Seed (2026-11-07, Runtime-Log)
+
+```
+[APIError: User already exists. Use another_email]  →  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL
+```
+
+Der Seed hat den Admin über den Benutzernamen gesucht. Coolify generiert `SERVICE_USER_APP` mit
+Großbuchstaben, Better Auth legt den Namen klein an – die Suche ging vorbei, also wurde erstellt, und
+das lief gegen die vorhandene interne E-Mail. Der Entrypoint hat mit `set -e` abgebrochen, der
+Container startete im Kreis neu (Migration und Seed jedes Mal von vorn).
+
+Zwei Änderungen:
+
+- `prisma/seed.ts` sucht den Admin über die interne E-Mail (der Schlüssel, auf den Better Auth prüft)
+  und normalisiert den Namen. Guard: `tests/integration/seed.test.ts`, „findet den Admin wieder, wenn
+  der Seedwert gemischt geschrieben ist“.
+- `docker-entrypoint.sh` lässt den Seed-Fehler laufen: `node dist/seed.mjs || echo ...`. Die App kann
+  ohne den Seed dienen; der Seed ist nur beim ersten Lauf nötig. Nachprüft mit einem absichtlich
+  fehlerhaften Seed im Container: Log zeigt die Meldung, Healthcheck bleibt healthy, `/api/health` grün.
+
+Wichtig für den laufenden Stand: das Passwort des vorhandenen Admins ist das aus dem ersten Lauf. Der
+Seed ändert nichts an einem bestehenden User.

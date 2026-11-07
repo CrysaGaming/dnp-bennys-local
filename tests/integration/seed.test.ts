@@ -58,6 +58,21 @@ describe("Seed", () => {
     expect(rank.permissions.length).toBe(Object.values(Permission).length);
   });
 
+  // Coolify generiert die Seedwerte – schon mal mit Großbuchstaben. Better Auth legt den
+  // Benutzernamen klein, darum findet die Suche per Username nichts und der zweite Lauf würde
+  // gegen die vorhandene interne E-Mail laufen: USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL.
+  it("findet den Admin wieder, wenn der Seedwert gemischt geschrieben ist", async () => {
+    const env = { ...seedEnv, adminUsername: "StartAdmin" };
+
+    await seed(prisma, env);
+    await expect(seed(prisma, env)).resolves.not.toThrow();
+
+    const user = await prisma.user.findFirstOrThrow();
+    expect(user.username).toBe("startadmin");
+    expect(await prisma.user.count()).toBe(1);
+    expect(await prisma.employee.count()).toBe(1);
+  });
+
   it("Admin-User muss Passwort ändern", async () => {
     await seed(prisma, seedEnv);
 

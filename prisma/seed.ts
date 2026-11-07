@@ -56,19 +56,26 @@ export async function seed(db: PrismaClient, env: SeedEnv): Promise<void> {
     return;
   }
 
-  const username = env.adminUsername;
-  const existingUser = await db.user.findUnique({ where: { username } });
-  const userId =
-    existingUser?.id ??
-    (await auth.api.createUser({
+  const username = env.adminUsername.trim().toLowerCase();
+  const email = internalEmail(username);
+
+  // Der Lookup läuft über die interne E-Mail, nicht über den Benutzernamen: das ist der Schlüssel,
+  // auf den Better Auth prüft. Ein Seedwert mit Großbuchstaben (Coolify generiert ihn so) würde per
+  // Username am gespeicherten, kleingeschriebenen Namen vorbeigehen und dann gegen die vorhandene
+  // E-Mail laufen – der Container startet dann im Kreis neu.
+  let userId = (await db.user.findUnique({ where: { email } }))?.id;
+
+  if (!userId) {
+    userId = (await auth.api.createUser({
       body: {
-        email: internalEmail(username),
+        email,
         password: env.adminPassword,
         name: "Admin",
         role: "admin",
         data: { username },
       },
     })).user.id;
+  }
 
   // Die Dienstnummer ist unique. Der Admin bekommt die kleinste freie Zahl – eine feste 1
   // scheitert, wenn sie schon vergeben ist, und dann bleibt der Employee fehlen.
