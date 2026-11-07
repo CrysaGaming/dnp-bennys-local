@@ -228,7 +228,7 @@ Hintergrund ist ein Bild, nicht eine Farbe. Darum steht die Rechnung jetzt als T
 (`src/lib/contrast.test.ts`, Unit-Projekt): sie liest die Hex-Werte aus `globals.css` und prüft die
 Paare, die im UI als Text stehen.
 
-Vorher (Light Mode,relativ zum Karten- resp. Hintergrundwert):
+Vorher (Light Mode, relativ zum Karten- resp. Hintergrundwert):
 
 | Token | auf Karte | auf Hintergrund |
 |---|---|---|
