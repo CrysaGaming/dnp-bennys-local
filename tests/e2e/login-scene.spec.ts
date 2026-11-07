@@ -14,6 +14,14 @@ test.describe("Login-Szene", () => {
     await startScene(page);
   });
 
+  // Spec 6.2: der Schatten gehört zur Szene, nicht zur Deko – ohne ihn steht der Tip-Text auf dem Foto.
+  test("Schattenebene unter dem HUD", async ({ page }) => {
+    await page.goto("/login");
+    await startScene(page);
+
+    await expect(page.locator(".login-shade")).toBeVisible();
+  });
+
   test("falsches Passwort zeigt Banner und Klartext", async ({ page }) => {
     await page.goto("/login");
     await startScene(page);

@@ -12,22 +12,22 @@
   --card-foreground: oklch(0.2103 0.0059 285.9);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2103 0.0059 285.9);
-  --primary: oklch(0.5961 0.2279 2.17); /* #E11D74 */
-  --primary-foreground: oklch(0.98 0.0045 78.3);
+  --primary: #C2154A; /* Spec 4.2 #E11D74 – im Light Mode einen Ton dunkler: der Button-Text braucht AA */
+  --primary-foreground: #F8F6F3; /* cremefarbener Text auf dem dunkleren Pink – 5,38 ✓ */
   --secondary: oklch(0.9528 0.0086 84.57);
   --secondary-foreground: oklch(0.2103 0.0059 285.9);
   --muted: oklch(0.9528 0.0086 84.57);
-  --muted-foreground: oklch(0.5517 0.0138 285.94); /* #71717A */
+  --muted-foreground: #63636B; /* Spec 4.2 #71717A – 4,30 auf der Karte war unter AA */
   --accent: oklch(0.9258 0.0116 84.58);
   --accent-foreground: oklch(0.2103 0.0059 285.9);
-  --destructive: oklch(0.5771 0.2152 27.33); /* #DC2626 */
-  --success: oklch(0.6271 0.1699 149.21); /* #16A34A */
+  --destructive: #B91C1C; /* Spec 4.2 #DC2626 – 4,37 auf dem Hintergrund war unter AA */
+  --success: #146C36; /* Spec 4.2 #16A34A – 2,90, weit unter AA */
   --accent-orange: oklch(0.6735 0.1759 46.44); /* #EA6C1F */
   --accent-violet: oklch(0.4907 0.2412 292.58); /* #6D28D9 */
-  --accent-cyan: oklch(0.6089 0.1109 221.72); /* #0891B2 */
+  --accent-cyan: #0E7490; /* Spec 4.2 #0891B2 – 3,21, Links müssen AA schaffen */
   --border: oklch(0.9145 0.0121 79.78); /* #E7E2DA */
   --input: oklch(0.9145 0.0121 79.78);
-  --ring: oklch(0.5961 0.2279 2.17);
+  --ring: #C2154A;
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.2103 0.0059 285.9);
   --sidebar-accent: oklch(0.9258 0.0116 84.58);
@@ -49,14 +49,14 @@
   --popover: oklch(0.1861 0.0162 284.72);
   --popover-foreground: oklch(0.9674 0.0013 286.37);
   --primary: oklch(0.662 0.2444 1.68); /* #FF2E88 */
-  --primary-foreground: oklch(0.98 0.0045 78.3);
+  --primary-foreground: #0B0B10; /* heller Text auf dem Neon-Pink schafft nur 3,22 – hier dunkle Tinte */
   --secondary: oklch(0.2045 0.0178 284.72);
   --secondary-foreground: oklch(0.9674 0.0013 286.37);
   --muted: oklch(0.2045 0.0178 284.72);
   --muted-foreground: oklch(0.7118 0.0129 286.07); /* #A1A1AA */
   --accent: oklch(0.2263 0.0174 284.93);
   --accent-foreground: oklch(0.9674 0.0013 286.37);
-  --destructive: oklch(0.6368 0.2078 25.33); /* #EF4444 */
+  --destructive: #F87171; /* Spec 4.2 #EF4444 – auf der Glas-Karte über dem hellsten Bild nur 3,60, hier 4,95 */
   --success: oklch(0.7227 0.192 149.58); /* #22C55E */
   --accent-orange: oklch(0.75 0.1668 50.54); /* #FF8A3D */
   --accent-violet: oklch(0.5413 0.2466 293.01); /* #7C3AED */
@@ -336,12 +336,24 @@ body {
 
 .login-hud-row {
   position: relative;
+  z-index: 6;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem 1.5rem;
+}
+
+/* Ebene 6 – Schatten unter dem HUD (Spec 6.2). Der Wert ist nicht Deko: ohne ihn reicht der
+ * Contrast auf dem hellsten Bild nicht (gemessen: 4,44, mit black/70: 9,05). */
+.login-shade {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 5;
+  height: 14rem;
+  background-image: linear-gradient(to top, rgb(0 0 0 / 0.7), transparent);
+  pointer-events: none;
 }
 
 /* Ebene 2 – Farbe, wandert langsam. */

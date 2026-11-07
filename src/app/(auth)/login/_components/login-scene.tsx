@@ -16,6 +16,7 @@ import { LogoSlam } from "./logo-slam";
 import { LoginCard } from "./login-card";
 import { StatusBanner } from "./status-banner";
 import { LoadingTips } from "./loading-tips";
+import { LoginShade } from "./login-shade";
 import { LoginMusicHUD } from "./login-music-hud";
 import { loginSceneReducer } from "./login-scene-machine";
 
@@ -109,6 +110,7 @@ export function LoginScene({
           <div key="scene" className="login-content">
             <BackgroundSlideshow />
             <SceneOverlays />
+            <LoginShade />
 
             <div className="login-stage">
               <LogoSlam companyName={companyName} logoVariant={logoVariant} />

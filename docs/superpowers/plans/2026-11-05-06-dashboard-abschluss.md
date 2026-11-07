@@ -220,3 +220,48 @@ Nachlauf 2026-11-07 nach den zwei Fixes aus Step 3: Typecheck grün, Lint grün 
   `fix(csp): Zod im jitless-Modus – die CSP erlaubt keine neue Function`,
   `fix(scripts): audit.mjs läuft jetzt – falsche Argumentreihenfolge und Session auf Browserebene`,
   `chore: chrome-remote-interface für die Lighthouse-Läufe`.
+
+#### Contrast der Tokens (Nachrechnung, 2026-11-07)
+
+Lighthouse meldet `color-contrast` grün, weil axe einen Text über einem Foto nicht bewerten kann – der
+Hintergrund ist ein Bild, nicht eine Farbe. Darum steht die Rechnung jetzt als Test
+(`src/lib/contrast.test.ts`, Unit-Projekt): sie liest die Hex-Werte aus `globals.css` und prüft die
+Paare, die im UI als Text stehen.
+
+Vorher (Light Mode,relativ zum Karten- resp. Hintergrundwert):
+
+| Token | auf Karte | auf Hintergrund |
+|---|---|---|
+| `muted-foreground` #71717A | 4,30 ✗ | 4,08 ✗ |
+| `primary` #E11D74 (Button) | 4,35 ✗ | 4,13 ✗ |
+| `success` #16A34A | 3,06 ✗ | 2,90 ✗ |
+| `accent-cyan` #0891B2 | 3,39 ✗ | 3,21 ✗ |
+| `destructive` #DC2626 | 4,37 ✗ | 4,15 ✗ |
+| `primary-foreground` auf `primary` (Dark) | 3,22 ✗ | — |
+
+Nach der Anpassung (gleiche Tonrichtung, nur dunkler; Login-Karte bleibt Glas):
+
+| Token | neu | auf Karte | auf Hintergrund |
+|---|---|---|---|
+| `muted-foreground` | #63636B | 5,25 ✓ | 4,97 ✓ |
+| `primary` (Button) | #C2154A | 5,68 ✓ | 5,38 ✓ |
+| `success` | #146C36 | 5,79 ✓ | 5,49 ✓ |
+| `accent-cyan` | #0E7490 | 4,81 ✓ | 4,56 ✓ |
+| `destructive` | #B91C1C | 6,08 ✓ | 5,76 ✓ |
+| Dark `destructive` | #F87171 | 6,73 ✓ | — |
+| Dark `primary-foreground` | #0B0B10 (dunkle Tinte auf Neon-Pink) | 5,56 ✓ | — |
+
+Login-Szene: die Karte ist `black/55` über dem Foto. Auf dem hellsten Bild (`bg-01`, mittleres Drittel,
+gemessener Mittelwert der Pixel) reicht das für Grau #A1A1AA (5,44 ✓) und für den alten Rotwert nicht
+(3,60 ✗) – mit #F87171 sind es 4,95 ✓. Der HUD-Text unten stand ohne Schatten bei 4,44 ✗; Spec 6.2
+verlangt den Schatten (black/70) genau dafür, und er fehlte. Ergänzt: `.login-shade` in `globals.css`,
+`LoginShade` in der Szene, guardiert durch `login-shade.test.tsx` und den E2E-Test
+„Schattenebene unter dem HUD“. Mit Schatten: 9,05 ✓.
+
+Im Light-Mode-Lauf (Mobile, 412×823, DPR 1,75) ist `color-contrast` jetzt grün: Accessibility 100,
+Agentic Browsing 100, 30 Audits, 0 Fehler.
+
+Login-Bilder: alle fünf in `public/login/` sind 1920×1080 WebP, unter 250 KB (111, 135, 86, 38, 45 KB)
+und stehen in `CREDITS.md`; die Alt-Texte in `images.ts` entsprechen den Beschreibungen dort.
+
+- [x] **Step 5: Commit** – `fix(login): HUD-Schatten und Token-Contrast auf AA`
