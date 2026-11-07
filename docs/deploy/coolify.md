@@ -267,13 +267,10 @@ Zwei Dinge dazu:
 
 - `NEXT_PUBLIC_*` wird beim Build in den Client geschrieben. Eine Runtime-Variable in Coolify wirkt
   nicht mehr – das Log sagte „No build-time variables to add to Dockerfiles“, also war nichts gesetzt.
-- Die Compose hat jetzt ein `music`-Volume auf `/app/public/audio`. Once filled, the file is served
-  (CSP `media-src 'self'` passt).
+- 
+Die Compose braucht kein Musik-Volume mehr: der Song ist seit 2026-11-07 im Repo und damit im Image
+(CSP `media-src 'self'` passt). Ein Volume über `/app/public/audio` würde die Datei im Image übrigens
+verdecken – darum ist es raus.
 
-```bash
-docker run --rm -v <stack>_music:/m -v "$PWD/public/audio":/src alpine cp /src/strassen-im-blut.mp3 /m/
-```
-
-Nachprüfung im Compose-Lauf: das Spielgerät antwortet auf `/audio/strassen-im-blut.mp3` mit 200, sobald
-die Datei im Volume liegt. Musik startet trotzdem nie ohne Nutzeraktion (Spec 6.4) – erst Taste oder
+Nachprüfung: Build mit dem Datei im Image, `/audio/strassen-im-blut.mp3` → 200, 3.230.109 Bytes, Health grün. Musik startet trotzdem nie ohne Nutzeraktion (Spec 6.4) – erst Taste oder
 Klick, und der Schalter muss an sein.

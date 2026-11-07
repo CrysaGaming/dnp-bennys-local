@@ -43,8 +43,7 @@ yarn-error.log*
 next-env.d.ts
 
 # Projekt (Benny's Portal)
-# Der Song kommt nicht ins Repo (Spec 6.4) – nur die Stille für die Tests.
-/public/audio/*.mp3
+# Der Song darf ins Repo – Entscheidung vom Owner am 2026-11-07. Die Stille bleibt für die Tests.
 /src/generated/
 /uploads/
 /tmp/

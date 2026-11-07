@@ -32,12 +32,6 @@ services:
       - UPLOAD_DIR=/app/uploads
     volumes:
       - uploads:/app/uploads
-      # Der Song ist nicht im Repo (.gitignore: /public/audio/*.mp3, Spec 6.4) – darum fehlt er im Image.
-      # Hier kommt er als Volume dazu und wird über /audio/strassen-im-blut.mp3 bedient (CSP: media-src self).
-      # Einmal füllen:
-      #   docker run --rm -v <stack>_music:/m -v "$PWD/public/audio":/src alpine cp /src/strassen-im-blut.mp3 /m/
-      # Oder den Ordner auf dem Server nehmen und als Bind mount einsetzen.
-      - music:/app/public/audio
     depends_on:
       postgres:
         condition: service_healthy
@@ -69,4 +63,3 @@ services:
 volumes:
   pgdata:
   uploads:
-  music:
