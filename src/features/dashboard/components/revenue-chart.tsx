@@ -19,7 +19,7 @@ export function RevenueChart({ days }: { days: RevenueDay[] }) {
     <section className="border border-border rounded-lg p-4 mb-6">
       <h2 className="font-display text-xl uppercase mb-3">Umsatz – letzte sieben Tage</h2>
 
-      <ChartContainer config={chartConfig} className="h-40 w-full" aria-label="Umsatz der letzten sieben Tage">
+      <ChartContainer config={chartConfig} className="h-40 w-full" role="img" aria-label="Umsatz der letzten sieben Tage">
         <BarChart data={days} margin={{ top: 8, right: 8, bottom: 8, left: 0 }}>
           <defs>
             <linearGradient id="sunset-bars" x1="0" y1="0" x2="1" y2="0">

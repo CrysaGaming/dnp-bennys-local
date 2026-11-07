@@ -39,3 +39,10 @@ test("Dashboard-Karten und letzte Aufträge", async ({ page }) => {
   await expect(page.getByText("Letzte Aufträge")).toBeVisible();
   await expect(page.getByRole("link", { name: new RegExp(`#${String(open.number).padStart(4, "0")}`) })).toBeVisible();
 });
+
+test("Umsatz-Diagramm ist als Bild benannt – aria-label ohne Rolle wirkt nicht", async ({ page }) => {
+  await page.goto("/dashboard");
+
+  const chart = page.getByRole("img", { name: "Umsatz der letzten sieben Tage" });
+  await expect(chart).toBeVisible();
+});
