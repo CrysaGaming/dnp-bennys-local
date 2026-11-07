@@ -215,3 +215,18 @@ Login mit den generierten Werten ✓, erzwungener Passwortwechsel ✓
 /app/uploads → drwxr-xr-x app app, schreiben als app ✓
 BETTER_AUTH_URL = http://localhost:3200 (im Test), im Deploy die FQDN
 ```
+
+### Das Laufprotokoll vom Container: Better Auth ohne Schema
+
+```
+[BetterAuthError: Invalid base URL: bennys.crysatec.com:3000. URL must include 'http://' or 'https://']
+```
+
+Coolify setzt die FQDN-Variable in die Env-Datei **ohne Schema** (`bennys.crysatec.com:3000`). Better
+Auth prüft das beim Import der Config, wirft, und der Container startet im Kreis neu – migration und
+Seed laufen jedes Mal wieder durch, weil das Skript vor dem Fehler fertig wird. Darum normalisiert
+`src/lib/auth-url.ts` den Wert (fehlt das Schema, wird `https://` gesetzt) und `src/lib/auth.ts` nutzt
+`baseURL` und `trustedOrigins` aus dieser Funktion. Guard: `src/lib/auth-url.test.ts`.
+
+In der Compose steht `BETTER_AUTH_URL=${SERVICE_FQDN_APP_3000}` ohne `https:`-Vorpräfix – sonst steht
+eventuell `https://https://…` da, wenn Coolify die Variable mit Schema liefert.
