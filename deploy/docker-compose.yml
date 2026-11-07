@@ -1,0 +1,58 @@
+# Deploy-Compose für Coolify (nicht für die lokale Entwicklung – dafür steht das `docker-compose.yml`
+# im Root, und `npm run db:up` startet daraus nur `db` und `db-test`).
+#
+# Coolify macht aus diesen beiden Diensten zwei Ressourcen: die Postgres und die App. Die Werte der
+# Variablen stehen in Coolify unter Variables, nicht in dieser Datei – hier stehen nur die Namen.
+# Ohne Variable bleibt sie leer, und der Seed liefert dann keinen Admin (CDD 29, Spec 13.4).
+
+services:
+  app:
+    # Der Build-Kontext ist das Repo-Wurzel, nicht das Ordner dieser Datei. `build: .` sucht das
+    # Dockerfile neben der Compose-Datei und findet es nicht – das ist der Fehler, der hier
+    # zuerst auftrat (`failed to read dockerfile: open Dockerfile: no such file or directory`).
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://bennys:${POSTGRES_PASSWORD}@db:5432/bennys
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+      SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD}
+      SEED_RADIO_CHANNEL: ${SEED_RADIO_CHANNEL}
+      SEED_RADIO_PASSWORD: ${SEED_RADIO_PASSWORD}
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    # Coolify prüft GET /api/health auf Port 3000. Der Healthcheck hier ist für den Fall, dass die
+    # Datei mit plain `docker compose` gefahren wird. `localhost` darf man darin nicht benutzen:
+    # in Alpine löst busybox das auf ::1 auf, der Server horcht aber auf IPv4 – der Check wird dann
+    # als Fehler verbucht und der Container gilt als unhealthy.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bennys
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: bennys
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bennys -d bennys"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
+  uploads:

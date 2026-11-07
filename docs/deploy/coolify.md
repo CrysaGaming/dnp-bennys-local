@@ -83,3 +83,24 @@ Das `docker-compose.yml` im Repo ist nur für die lokalen Datenbanken (5434 Dev,
 App-Container – in Coolify ist die Postgres eine eigene Ressource, die App kommt aus dem Dockerfile. Wer
 die App über Compose fährt, muss `DATABASE_URL` auf `postgresql://bennys:bennys@db:5432/bennys` setzen und
 das Volume auf `/app/uploads` hängen.
+
+### Drei Dinge, die den Compose-Deploy blockiert haben (nachprüft 2026-11-07)
+
+1. **Build-Kontext.** `build: .` in einer Compose-Datei in `deploy/` sucht das Dockerfile in
+   `deploy/` und findet es nicht: `failed to read dockerfile: open Dockerfile: no such file or
+   directory`. Richtig ist `build: { context: .., dockerfile: Dockerfile }`.
+2. **Bind-Adresse.** `server.js` bindet `process.env.HOSTNAME || '0.0.0.0'`. In einem Container ist
+   `HOSTNAME` die Container-ID, also horcht der Server nur auf der Container-IP. Ein Healthcheck im
+   Container auf `http://localhost:3000/api/health` gibt Connection refused – und busybox löst
+   `localhost` auf `::1` auf, während der Server auf IPv4 horcht. Im Dockerfile steht jetzt
+   `ENV HOSTNAME=0.0.0.0`, im Healthcheck `http://127.0.0.1:3000/api/health`.
+3. **Volume-Rechte.** Siehe oben: `mkdir` + `chown` für `/app/uploads`, sonst schreibt der
+   `app`-Benutzer nicht in das Volume.
+
+Nachprüfung mit `deploy/docker-compose.yml` (Werte über eine Test-Env-Datei, nichts im Repo):
+beide Dienste `healthy`, `netstat` zeigt `0.0.0.0:3000`, `/api/health` → `{"status":"ok","db":"ok"}`,
+Login über die API läuft, `touch /app/uploads/probe` als `app` ✓.
+
+In dieser Datei stehen nur Variablen**namen** (`${BETTER_AUTH_SECRET}` und so weiter) – die Werte kommen
+aus Coolify. Ohne Variable bleibt sie leer, der Seed erzeugt dann keinen Admin (CDD 29). Ohne `ports:`
+geht der Zugriff in Coolify über den Proxy; für plain `docker compose` muss eine Port-Mapping dazu.

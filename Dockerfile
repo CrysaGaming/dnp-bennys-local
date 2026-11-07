@@ -24,6 +24,10 @@ FROM node:26-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
+# `server.js` bindet `process.env.HOSTNAME || '0.0.0.0'`. In einem Container ist HOSTNAME die
+# Container-ID, darum hört der Server nur auf der eigenen IP – ein Healthcheck im Container auf
+# `localhost:3000` gibt Connection refused und Coolify stellt die App als unhealthy ab.
+ENV HOSTNAME=0.0.0.0
 
 RUN addgroup -S app && adduser -S app -G app
 
