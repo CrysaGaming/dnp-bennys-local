@@ -109,7 +109,8 @@ Versionen laut npm-Registry am 2026-11-05.
 .
 ├─ Dockerfile                   # Produktions-Image für Coolify (Next.js standalone, 13.2)
 ├─ docker-entrypoint.sh         # migrate deploy → seed → server starten
-├─ docker-compose.yml           # postgres:17, nur für lokale Entwicklung
+├─ docker-compose.yml           # Deploy-Compose für Coolify (app + db) – Coolify erkennt nur diesen
+│                             # Namen im Root. Die lokalen Datenbanken stehen in docker-compose.dev.yml
 ├─ prisma.config.ts             # Prisma 7: Schema-Pfad, Migrations, DATABASE_URL
 ├─ prisma/
 │  ├─ schema.prisma

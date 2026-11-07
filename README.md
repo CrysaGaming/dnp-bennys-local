@@ -34,7 +34,7 @@ npm run lint           # ESLint
 npm run test:unit      # Vitest: Projekte unit + ui
 npm run test:int       # Vitest: integration gegen Test-DB
 npm run test:e2e       # Playwright gegen Produktions-Build
-npm run db:up          # Postgres-Container (dev + test)
+npm run db:up          # Postgres-Container (dev + test) – nutzt docker-compose.dev.yml
 npm run db:migrate     # prisma migrate dev
 npm run db:seed        # Seed gegen Dev-DB
 npm run db:test:reset  # Test-DB zurücksetzen

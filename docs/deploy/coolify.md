@@ -5,7 +5,8 @@ die Begründungen stehen in der Spec.
 
 ## 1. Projekt und Ressourcen
 
-- [ ] Projekt `bennys-portal` angelegt, Environment `production`.
+- [x] Projekt `bennys-portal` angelegt, Environment `production`. Compose-Quelle: `docker-compose.yml` im Root.
+  (Dateistand 2026-11-07; das Anlegen selbst ist deine Aufgabe.)
 - [ ] PostgreSQL 17 als Ressource added, **Internal URL** notiert.
 - [ ] Application aus dem öffentlichen Repo, Branch `main`, Build Pack **Dockerfile**, Port `3000`.
 - [ ] Domain eingetragen, HTTPS-Zertifikat von Coolify.
@@ -79,16 +80,16 @@ RUN mkdir -p /app/uploads && chown -R app:app /app/uploads
 Nachprüfung mit einem frischen Volume (Compose: `app` + `db`, `depends_on` mit Healthcheck):
 `ls -ld /app/uploads` → `drwxr-xr-x app app`, `touch /app/uploads/probe` als `app` ✓.
 
-Das `docker-compose.yml` im Repo ist nur für die lokalen Datenbanken (5434 Dev, 5435 Test) und fährt keinen
-App-Container – in Coolify ist die Postgres eine eigene Ressource, die App kommt aus dem Dockerfile. Wer
-die App über Compose fährt, muss `DATABASE_URL` auf `postgresql://bennys:bennys@db:5432/bennys` setzen und
-das Volume auf `/app/uploads` hängen.
+`docker-compose.yml` im Root ist die Deploy-Compose (app + db) – Coolify scannt das Repo und erkennt nur
+diesen Namen im Root. Die lokalen Datenbanken laufen aus `docker-compose.dev.yml` (`npm run db:up`).
+Coolify macht aus den beiden Diensten zwei Ressourcen. Die Werte der Variablen kommen aus Coolify, in der
+Datei stehen nur die Namen.
 
 ### Drei Dinge, die den Compose-Deploy blockiert haben (nachprüft 2026-11-07)
 
-1. **Build-Kontext.** `build: .` in einer Compose-Datei in `deploy/` sucht das Dockerfile in
-   `deploy/` und findet es nicht: `failed to read dockerfile: open Dockerfile: no such file or
-   directory`. Richtig ist `build: { context: .., dockerfile: Dockerfile }`.
+1. **Build-Kontext.** `build: .` sucht das Dockerfile im Ordner der Compose-Datei. Lag die Datei in
+   `deploy/`, war der Buildfehler genau das: `failed to read dockerfile: open Dockerfile: no such
+   directory`. Darum liegt sie im Root – dort passt `context: .`.
 2. **Bind-Adresse.** `server.js` bindet `process.env.HOSTNAME || '0.0.0.0'`. In einem Container ist
    `HOSTNAME` die Container-ID, also horcht der Server nur auf der Container-IP. Ein Healthcheck im
    Container auf `http://localhost:3000/api/health` gibt Connection refused – und busybox löst
@@ -97,7 +98,7 @@ das Volume auf `/app/uploads` hängen.
 3. **Volume-Rechte.** Siehe oben: `mkdir` + `chown` für `/app/uploads`, sonst schreibt der
    `app`-Benutzer nicht in das Volume.
 
-Nachprüfung mit `deploy/docker-compose.yml` (Werte über eine Test-Env-Datei, nichts im Repo):
+Nachprüfung mit der Compose im Root (Werte über eine Test-Env-Datei, nichts im Repo):
 beide Dienste `healthy`, `netstat` zeigt `0.0.0.0:3000`, `/api/health` → `{"status":"ok","db":"ok"}`,
 Login über die API läuft, `touch /app/uploads/probe` als `app` ✓.
 
