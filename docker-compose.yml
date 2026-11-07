@@ -1,13 +1,19 @@
 # Deploy-Compose für Coolify. Sie muss im Root liegen und `docker-compose.yml` heißen – Coolify
 # scannt das Repo und erkennt nur diesen Namen im Root.
 #
-# Coolify legt die Env-Datei selbst an und füllt sie (im Deploy-Lauf ist das
-# `/artifacts/<uuid>/.env`, das Compose mit `--env-file` bekommt). Darum steht hier keine
-# Interpolation und kein Placeholder: die Namen müssen nur in Coolify existieren. Postgres ist in
-# Coolify eine eigene Ressource, ihre Internal URL kommt als `DATABASE_URL` in die Env-Datei.
+# Es ist nichts in Coolify zu setzen: Coolify erzeugt die Werte für `SERVICE_*` selbst und schreibt
+# sie in seine Env-Datei (`bootstrap/helpers/shared.php`, `generateEnvValue`). Die Generate-Namen
+# stehen unter Variables in Coolify – dort liest man das Startpasswort für den ersten Login ab.
+# Nach dem ersten Login muss der Admin es ändern (Spec 3.4), dann ist der generierte Wert egal.
+# Funk-Kanal und Funk-Passwort bleiben draußen: sie sind nullable und werden in den
+# Firmeneinstellungen gesetzt (Spec 13.4). Fehlen sie, setzt der Seed einfach nichts.
+#
+# `SERVICE_FQDN_APP_3000` ist die Domain mit Port – danach richtet Coolify den Proxy aus
+# (`ServiceApplication::getRequiredPort`). Die Port-Angabe darf nicht fehlen, sonst kennt Coolify
+# den Port des Containers nicht.
 #
 # Die lokalen Datenbanken (5434 Dev, 5435 Test) laufen aus `docker-compose.dev.yml` – das nutzt
-# `npm run db:up`. Diese Datei fährt hier nur die App.
+# `npm run db:up`.
 
 services:
   app:
@@ -15,17 +21,44 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
-    env_file: .env
+    environment:
+      - SERVICE_FQDN_APP_3000
+      - DATABASE_URL=postgresql://bennys:${SERVICE_PASSWORD_DB}@db:5432/bennys
+      - BETTER_AUTH_SECRET=${SERVICE_BASE64_64_APP}
+      - BETTER_AUTH_URL=${SERVICE_FQDN_APP_3000}
+      - SEED_ADMIN_USERNAME=${SERVICE_USER_APP}
+      - SEED_ADMIN_PASSWORD=${SERVICE_PASSWORD_APP}
+      - UPLOAD_DIR=/app/uploads
     volumes:
       - uploads:/app/uploads
-    # `localhost` geht in Alpine nicht: busybox löst das auf ::1 auf, und ohne ENV HOSTNAME=0.0.0.0
-    # im Dockerfile horcht der Server auf der Container-IP. Beide Punkte sind im Dockerfile gesetzt.
+    depends_on:
+      db:
+        condition: service_healthy
+    # 127.0.0.1 statt localhost: busybox in Alpine löst localhost auf ::1 auf, der Server horcht
+    # auf IPv4 (ENV HOSTNAME=0.0.0.0 im Dockerfile). Curl gibt es im Image nicht, wget schon.
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health || exit 1"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
       interval: 15s
       timeout: 5s
       start_period: 30s
       retries: 5
 
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=bennys
+      - POSTGRES_DB=bennys
+      - POSTGRES_PASSWORD=${SERVICE_PASSWORD_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bennys -d bennys"]
+      interval: 5s
+      timeout: 5s
+      start_period: 10s
+      retries: 10
+
 volumes:
+  pgdata:
   uploads:

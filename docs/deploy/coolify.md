@@ -188,3 +188,30 @@ docker inspect --format '{{.State.Health.Status}}' testapp-app-1   → healthy
 /app/uploads → drwxr-xr-x app app, schreiben als app ✓
 Healthcheck-Log: ExitCode 0, Output {"status":"ok","db":"ok"}
 ```
+
+### Die Compose ist selbstständig – nichts in Coolify setzen
+
+Coolify erzeugt die Werte für `SERVICE_*` selbst (`bootstrap/helpers/shared.php`, `generateEnvValue`)
+und schreibt sie in seine Env-Datei. Darum stehen in der Datei nur diese Platzhalter:
+
+- `${SERVICE_PASSWORD_DB}` – Passwort für die Postgres
+- `${SERVICE_BASE64_64_APP}` – `BETTER_AUTH_SECRET`
+- `${SERVICE_USER_APP}` und `${SERVICE_PASSWORD_APP}` – der Seed-Admin
+- `${SERVICE_FQDN_APP_3000}` – die Domain. Die Portzahl gehört dazu: Coolify liest den Port aus der
+  FQDN-Variable, die **direkt** im Dienst steht (`ServiceApplication::getRequiredPort`). Ohne die Zahl
+  kennt Coolify den Port des Containers nicht.
+
+Die generierten Werte stehen in Coolify unter Variables – dort liest man das Startpasswort für den
+ersten Login ab. Nach dem ersten Login muss der Admin es ändern (Spec 3.4), dann ist der generierte
+Wert bedeutungslos. Funk-Kanal und Funk-Passwort sind nullable und werden in den Firmeneinstellungen
+gesetzt (Spec 13.4), darum stehen sie nicht in der Compose.
+
+Nachprüfung (Werte per Test-Env-Datei, dieselbe Mechanik wie Coolify, nichts im Repo):
+
+```
+app healthy, db healthy
+/api/health → {"status":"ok","db":"ok"}
+Login mit den generierten Werten ✓, erzwungener Passwortwechsel ✓
+/app/uploads → drwxr-xr-x app app, schreiben als app ✓
+BETTER_AUTH_URL = http://localhost:3200 (im Test), im Deploy die FQDN
+```
