@@ -1,18 +1,20 @@
-import { readFileSync } from "node:fs";
-import lighthouse from "lighthouse";
+import lighthouse, { defaultConfig } from "lighthouse";
+import * as chromeLauncher from "chrome-launcher";
 import CDP from "chrome-remote-interface";
-import { chromium } from "@playwright/test";
+import dotenv from "dotenv";
 import { formatScores, reportLine } from "../src/lib/lighthouse-report.ts";
 
-const BASE = process.env.AUDIT_BASE_URL ?? "http://localhost:3100";
-const STATE = "tests/e2e/.auth/admin.json";
-const PATHS = ["/login", "/dashboard"];
+dotenv.config();
 
-// Der Server muss laufen – im Testlauf startet ihn Playwright, hier wird er von Hand gestartet.
+const BASE = process.env.AUDIT_BASE_URL ?? "http://localhost:3100";
+
+// Zugangsdaten nur aus der Umgebung – nie im Repo.
+const USER = process.env.SEED_ADMIN_USERNAME;
+const PASS = process.env.SEED_ADMIN_PASSWORD;
+
 async function alive() {
   try {
-    const res = await fetch(`${BASE}/login`);
-    return res.ok;
+    return (await fetch(`${BASE}/login`)).ok;
   } catch {
     return false;
   }
@@ -23,39 +25,51 @@ if (!(await alive())) {
   process.exit(1);
 }
 
-const browser = await chromium.launch({
-  headless: true,
-  args: ["--remote-debugging-port=9222"],
-});
+if (!USER || !PASS) {
+  console.error("SEED_ADMIN_USERNAME und SEED_ADMIN_PASSWORD fehlen – ohne Sitzung wird /dashboard umgeleitet.");
+  process.exit(1);
+}
 
-const state = JSON.parse(readFileSync(STATE, "utf8"));
-const client = await CDP({ port: 9222 });
+const chrome = await chromeLauncher.launch({ chromeFlags: ["--headless=new", "--window-size=412,823"] });
+const client = await CDP({ port: chrome.port });
+await client.Network.enable();
 
-// Cookies gehören in den Browser, nicht in einen Playwright-Kontext – sonst sieht Lighthouse beim
-// ersten Request keine Session und die Route leitet auf /login um.
-await client.Network.setCookies(state.cookies.map((c) => ({ name: c.name, value: c.value, path: "/", domain: c.domain || "localhost" })));
+const flags = {
+  port: chrome.port,
+  output: "json",
+  onlyCategories: ["performance", "accessibility"],
+  formFactor: "mobile",
+};
 
 const lines = [];
 
-for (const path of PATHS) {
-  const result = await lighthouse(`${BASE}${path}`, {
-    port: 9222,
-    output: "json",
-    onlyCategories: ["performance", "accessibility"],
-    formFactor: "mobile",
-    screenEmulation: { mobile: true, width: 412, height: 812, deviceScaleFactor: 1, disabled: false },
-    throttlingMethod: "provided",
-  });
+try {
+  // /login ohne Sitzung. Mit Sitzung leitet die Seite um, und die Zahl stünde für das Dashboard.
+  lines.push(reportLine((await lighthouse(`${BASE}/login`, flags, defaultConfig)).lhr));
 
-  if (!result) {
-    lines.push({ url: `${BASE}${path}`, redirected: false, performance: null, accessibility: null });
-    continue;
+  // Die Session kommt aus dem echten Login und wird per CDP auf Browserebene gesetzt. Ein
+  // Storage-State aus Playwright reicht hier nicht: der Cookie liegt zwar im Jar, aber der
+  // Dokument-Request von Lighthouse kommt ohne ihn an (die Seite leitet auf /login um).
+  const res = await fetch(`${BASE}/api/auth/sign-in/username`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ username: USER, password: PASS }),
+  });
+  const raw = res.headers.getSetCookie();
+  if (!raw.length) {
+    console.error(`Login fehlte (${res.status}) – ohne Sitzung ist /dashboard nicht messbar.`);
+    process.exit(1);
   }
 
-  lines.push(reportLine(result.lighthouse));
+  for (const c of raw) {
+    const pair = c.split(";")[0];
+    const i = pair.indexOf("=");
+    await client.Network.setCookie({ name: pair.slice(0, i), value: pair.slice(i + 1), domain: "localhost", path: "/" });
+  }
+
+  lines.push(reportLine((await lighthouse(`${BASE}/dashboard`, flags, defaultConfig)).lhr));
+  console.log(formatScores(lines));
+} finally {
+  await client.close();
+  await chrome.kill();
 }
-
-console.log(formatScores(lines));
-
-await client.close();
-await browser.close();
