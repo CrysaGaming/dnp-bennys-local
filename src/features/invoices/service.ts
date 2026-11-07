@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { prisma } from "@/lib/prisma";
 import { writeAudit } from "@/lib/audit";
 import { assertPermission } from "@/lib/permissions";

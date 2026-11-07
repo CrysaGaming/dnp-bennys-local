@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { ThemePreference } from "@/generated/prisma/enums";
 
 /** Eigenes Profil (Spec 5.12): nur Name und Telefon, der Rang wird nicht angefasst. */

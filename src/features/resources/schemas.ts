@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { parseKgToGrams } from "@/lib/format";
 
 function isWholeDollar(value: unknown): boolean {

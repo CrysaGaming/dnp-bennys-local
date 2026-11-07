@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 /** Korrektur einer Dienstzeit (Spec 5.7): Notiz Pflicht, Ende nach Beginn. */
 export const correctEntrySchema = z

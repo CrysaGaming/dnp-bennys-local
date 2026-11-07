@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 /** Login – Benutzername wie in Spec 3.2 (keine E-Mail, keine Selbstregistrierung). */
 export const loginSchema = z.object({

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { plateSchema } from "./normalize";
 
 export const vehicleSchema = z.object({

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { Permission } from "@/generated/prisma/enums";
 
 const PERMISSION_VALUES = Object.values(Permission) as [Permission, ...Permission[]];

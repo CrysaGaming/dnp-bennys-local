@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import {
   toActionError,
   ForbiddenError,

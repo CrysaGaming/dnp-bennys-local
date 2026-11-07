@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 const orderType = z.enum(["REPAIR", "TUNING", "PAINT", "TOWING", "OTHER"]);
 

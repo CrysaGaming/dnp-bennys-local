@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { EmployeeStatus } from "@/generated/prisma/enums";
 
 const nameField = z

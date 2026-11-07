@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import type { Prisma } from "@/generated/prisma/client";
 import type { LoyaltyTxType } from "@/generated/prisma/enums";
 import { InsufficientLoyaltyError, NotFoundError } from "@/lib/errors";

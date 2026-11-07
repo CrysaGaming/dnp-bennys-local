@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 const wholeNumber = z.number().int("Ganze Zahlen");
 

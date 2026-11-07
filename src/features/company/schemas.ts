@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { CompanyStatusMode, LogoVariant } from "@/generated/prisma/enums";
 
 /**

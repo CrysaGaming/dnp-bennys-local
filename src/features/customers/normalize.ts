@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 /** Das Kennzeichen kommt aus dem Formular in jeder Schreibweise – gespeichert wird normalisiert. */
 export function normalizePlate(input: string): string {
