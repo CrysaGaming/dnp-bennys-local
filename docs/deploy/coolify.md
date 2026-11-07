@@ -254,3 +254,26 @@ meldete sechsmal „You are using the default secret“. Der Build lief durch, a
 `authSecret()` gibt jetzt nur für `NEXT_PHASE=phase-production-build` einen Platzhalter – in Produktion
 bleibt es beim Fehler, wenn das Secret fehlt. Nachprüfung: Build ohne Secret,Build编译, 0
 Meldungen.
+
+### Der Song fehlt im Deploy (nicht im Repo, Spec 6.4)
+
+`strassen-im-blut.mp3` ist lokal da, aber in `.gitignore` (Zeile 47: `/public/audio/*.mp3`) – bewusst,
+weil Suno-Songs nicht ins Repo gehören. Coolify clont das Repo, darum enthält das Image nur
+`README.md` und `silence-1s.wav`. Der Player setzt die Quelle auf
+`process.env.NEXT_PUBLIC_MUSIC_SRC ?? "/audio/strassen-im-blut.mp3"` – die Datei ist da, also 404, und
+`play()` auf eine fehlende Quelle ist kein Fehler, sondern Stillschweigen.
+
+Zwei Dinge dazu:
+
+- `NEXT_PUBLIC_*` wird beim Build in den Client geschrieben. Eine Runtime-Variable in Coolify wirkt
+  nicht mehr – das Log sagte „No build-time variables to add to Dockerfiles“, also war nichts gesetzt.
+- Die Compose hat jetzt ein `music`-Volume auf `/app/public/audio`. Once filled, the file is served
+  (CSP `media-src 'self'` passt).
+
+```bash
+docker run --rm -v <stack>_music:/m -v "$PWD/public/audio":/src alpine cp /src/strassen-im-blut.mp3 /m/
+```
+
+Nachprüfung im Compose-Lauf: das Spielgerät antwortet auf `/audio/strassen-im-blut.mp3` mit 200, sobald
+die Datei im Volume liegt. Musik startet trotzdem nie ohne Nutzeraktion (Spec 6.4) – erst Taste oder
+Klick, und der Schalter muss an sein.
