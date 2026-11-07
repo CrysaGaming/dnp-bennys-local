@@ -751,6 +751,7 @@ Wer schon eingeloggt ist (echte Session-Prüfung in `login/page.tsx`, siehe 3.2)
 - Die direkte CDN-Datei (`cdn1.suno.ai/<id>.mp3`) antwortete beim Test mit **403 Forbidden**. Hotlinking ist also nicht zuverlässig.
 - Eine Suno-Share-Seite lässt sich nicht als Audioquelle einbetten.
 - **Lösung:** Lade die MP3 in Suno herunter (Song → Download → MP3) und lege sie unter `public/audio/strassen-im-blut.mp3` ab. So kommt die Datei vom eigenen Server, lädt schnell und ist unabhängig von Suno.
+- **Seit 2026-11-07 liegt die Datei im Repo** (Entscheidung vom Owner; die Ausschließung in `.gitignore` ist weg). Damit steckt sie im Image und muss in Coolify nicht als Volume eingehängt werden. Das Repo ist öffentlich – die Rechte aus dem nächsten Punkt bleiben davon unberührt.
 - **Rechte:** Mit dem kostenlosen Suno-Plan sind Songs nur für nicht-kommerzielle Nutzung freigegeben. Für ein internes RP-Portal passt das. Bei kommerzieller Nutzung braucht der Song einen Pro- oder Premier-Plan.
 
 **Komponente `music-player.tsx` (Client):**
