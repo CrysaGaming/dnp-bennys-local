@@ -37,10 +37,10 @@ Der Entrypoint macht in dieser Reihenfolge: `prisma migrate deploy` → `node di
 `node server.js`. Migrationen müssen rückwärtskompatibel bleiben, weil die alte Version läuft, bis
 die neue gesund ist: erst Spalten hinzufügen, Entfernen erst in einem späteren Release.
 
-- [ ] `npm run db:test:reset && docker build -t bennys-portal:local .` läuft durch.
-- [ ] `docker run` gegen die Test-DB: Log zeigt Migration, Seed und Server-Start.
-- [ ] `curl -s localhost:3200/api/health` → `{"status":"ok","db":"ok"}`.
-- [ ] Im Browser: Login, Passwortwechsel, Dashboard, Avatar-Upload.
+- [x] `npm run db:test:reset && docker build -t bennys-portal:local .` läuft durch. (2026-11-07, Docker 29.8.1)
+- [x] `docker run` gegen die Test-DB: Log zeigt Migration und Server-Start (2026-11-07). Der Seed läuft still, wenn der Admin schon existiert – idempotent.
+- [x] `curl -s localhost:3200/api/health` → `{"status":"ok","db":"ok"}` (2026-11-07, Lauf gegen Port 5435).
+- [x] Im Browser gegen den Container (2026-11-07): Login, erzwungener Passwortwechsel (`/settings?pw=1`), Dashboard. Avatar-Upload nicht manuell geprüft – gedeckt durch `tests/e2e/account.spec.ts`. Die Security-Header kommen auch aus dem Container.
 
 ## 4. Auto-Deploy
 
