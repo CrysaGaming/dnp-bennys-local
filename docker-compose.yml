@@ -1,16 +1,14 @@
 # Deploy-Compose für Coolify. Sie muss im Root liegen und `docker-compose.yml` heißen – Coolify
 # scannt das Repo und erkennt nur diesen Namen im Root.
 #
-# Es ist nichts in Coolify zu setzen: Coolify erzeugt die Werte für `SERVICE_*` selbst und schreibt
-# sie in seine Env-Datei (`bootstrap/helpers/shared.php`, `generateEnvValue`). Die Generate-Namen
-# stehen unter Variables in Coolify – dort liest man das Startpasswort für den ersten Login ab.
-# Nach dem ersten Login muss der Admin es ändern (Spec 3.4), dann ist der generierte Wert egal.
-# Funk-Kanal und Funk-Passwort bleiben draußen: sie sind nullable und werden in den
-# Firmeneinstellungen gesetzt (Spec 13.4). Fehlen sie, setzt der Seed einfach nichts.
+# Die Form ist die, die Coolify selbst erzeugt: `SERVICE_*`-Platzhalter, die Coolify füllt
+# (`generateEnvValue` in `bootstrap/helpers/shared.php`), Healthchecks, `depends_on` mit
+# `service_healthy`, `restart: unless-stopped`. Nichts in Coolify setzen – Deploy drücken reicht.
+# Die generierten Werte stehen in Coolify unter Variables; dort steht auch das Startpasswort für den
+# ersten Login. Danach muss der Admin es ändern (Spec 3.4).
 #
-# `SERVICE_FQDN_APP_3000` ist die Domain mit Port – danach richtet Coolify den Proxy aus
-# (`ServiceApplication::getRequiredPort`). Die Port-Angabe darf nicht fehlen, sonst kennt Coolify
-# den Port des Containers nicht.
+# `SERVICE_FQDN_APP_3000` mit Port: Coolify liest den Port aus der FQDN-Variable, die direkt im Dienst
+# steht (`ServiceApplication::getRequiredPort`). Ohne die Zahl kennt Coolify den Port nicht.
 #
 # Die lokalen Datenbanken (5434 Dev, 5435 Test) laufen aus `docker-compose.dev.yml` – das nutzt
 # `npm run db:up`.
@@ -23,7 +21,7 @@ services:
     restart: unless-stopped
     environment:
       - SERVICE_FQDN_APP_3000
-      - DATABASE_URL=postgresql://bennys:${SERVICE_PASSWORD_DB}@db:5432/bennys
+      - DATABASE_URL=postgresql://bennys:${SERVICE_PASSWORD_POSTGRES}@postgres:5432/bennys
       - BETTER_AUTH_SECRET=${SERVICE_BASE64_64_APP}
       - BETTER_AUTH_URL=${SERVICE_FQDN_APP_3000}
       - SEED_ADMIN_USERNAME=${SERVICE_USER_APP}
@@ -32,28 +30,28 @@ services:
     volumes:
       - uploads:/app/uploads
     depends_on:
-      db:
+      postgres:
         condition: service_healthy
-    # 127.0.0.1 statt localhost: busybox in Alpine löst localhost auf ::1 auf, der Server horcht
-    # auf IPv4 (ENV HOSTNAME=0.0.0.0 im Dockerfile). Curl gibt es im Image nicht, wget schon.
+    # 127.0.0.1 statt localhost: busybox in Alpine löst localhost auf ::1 auf, und im Image gibt es
+    # kein curl – nur wget. Der Server horcht auf IPv4 (ENV HOSTNAME=0.0.0.0 im Dockerfile).
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health || exit 1"]
       interval: 15s
       timeout: 5s
       start_period: 30s
       retries: 5
 
-  db:
+  postgres:
     image: postgres:17
     restart: unless-stopped
     environment:
       - POSTGRES_USER=bennys
       - POSTGRES_DB=bennys
-      - POSTGRES_PASSWORD=${SERVICE_PASSWORD_DB}
+      - POSTGRES_PASSWORD=${SERVICE_PASSWORD_POSTGRES}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bennys -d bennys"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bennys} -d ${POSTGRES_DB:-bennys}"]
       interval: 5s
       timeout: 5s
       start_period: 10s
