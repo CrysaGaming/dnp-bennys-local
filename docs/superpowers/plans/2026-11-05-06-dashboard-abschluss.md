@@ -146,11 +146,50 @@ Expected: `docker logs bennys-local` zeigt Migration, Seed und Server-Start; `cu
 Expected: alles grün
 
 Ergebnis 2026-11-06: Typecheck grün, Lint grün (eine Warnung von der TanStack-Regel), 197 Unit/ui, 157 Integration, 48 E2E. E2E läuft seit Phase 9 in einem Worker – zwei Specs schrieben dieselbe Singleton-Zeile des Treue-Sets parallel.
+Nachlauf 2026-11-07 nach den zwei Fixes aus Step 3: Typecheck grün, Lint grün (dieselbe Warnung),
+203 Unit/ui (50 Dateien), 157 Integration, 50 E2E – alles grün.
 - [x] **Step 2: Spec-Abgleich** – Erfolgskriterien aus Spec 1 einzeln im Browser prüfen (Login, Redirect, Header-Daten, serverseitige Rechte, Musik mit Nutzeraktion und Mute, Light/Dark, reduzierte Bewegung) und das Ergebnis im PR-Text festhalten.
   Ergebnis 2026-11-06. Was automated trägt: Login und Redirect (Umleitung auf `/settings?pw=1`, fehlendes Profil gibt eine Meldung statt Stillschweigen – `auth.spec.ts`, `login-notice.test.ts`, `dal.test.ts`). Header-Daten und Status (`shell.spec.ts` Breite, `status.spec.ts` API mit Session). Serverseitige Rechte – jede Fachfunktion prüft selbst, die Tests laufen ohne UI-Rechte (`ranks.test.ts`, `employees.test.ts`, `inventory.test.ts`, `orders.test.ts`, `invoices.test.ts`, `audit-view.test.ts`). Musik startet nie ohne Nutzeraktion und ein abgelehntes `play()` ist der Zustand `blocked` (`first-interaction.test.ts`, `login-scene.spec.ts`, `dashboard-music.spec.ts`, Autoplay-Test mit eigenem Profil). Reduzierte Bewegung: CSS-Regel für `[data-reduced-motion]` plus Tests, Hydration bleibt gleich (`template.test.tsx`, `login-scene.spec.ts`). Light/Dark: Umschalter ohne Client-Differenz geprüft (`theme-toggle.test.tsx`). Der **Login-Schirm ist visiert** (Screenshot über den MCP-Chrome): dunkler Overlay über `intro.webp`, Benny's-Logo in der Scriptschrift, „DRÜCKE EINE TASTE ODER KLICKE“ in Geist Mono, Buchstabenabstand wie in Spec 6.1 – passt. Das Aussehen des Dashboards in Light und Dark ist noch nicht visiert, weil ich im MCP-Browser nicht reinkam: der von Hand gestartete Server auf 3100 liest `.env` (Dev-DB mit `debug1` und `seedadmin`), der Login mit den Test-Platzhaltern wurde abgelehnt. Für die Dashboard-Bilder und den Lighthouse-Wert brauchst du einen Lauf mit echter Session.
   Der Dashboard-Lighthouse-Wert steht weiterhin aus: ohne Session leitet `/dashboard` auf `/login`, und der Audit-Lauf im Browser brachte das Dokument nicht auf `/dashboard`.
+  Ergebnis 2026-11-07: Dashboard in Dark und Light ist jetzt visiert (Screenshot über den MCP-Chrome mit
+  echter Sitzung: dunkler Hintergrund nahe `oklch` 0, Karten mit `border-border`, Accent Pink, Scriptschrift
+  im Logo, Sidebar mit den sieben Gruppen; dieselbe Seite hell: Hintergrund fast weiß, Karten weiß, Text dunkel,
+  Umschalter oben im Header). Die Konsole auf `/login` (ohne Sitzung) und `/dashboard` (mit Sitzung) war leer –
+  bis der Zod-Befund in Step 3 behoben war; danach wieder leer.
 - [x] **Step 3: Lighthouse** – `/login` und `/dashboard` (Mobile): Performance ≥ 85, Accessibility ≥ 90.
-  `/login` (Mobile, Lighthouse 13.6): Performance 100, Accessibility 100.
-  `/dashboard` wurde **nicht** mit Sitzung gemessen – ohne Cookie leitet die Seite auf `/login`, und Lighthouse hat genau das bewertet (mainDocumentUrl = /login). Für den Dashboard-Wert braucht Lighthouse den eingeloggten Zustand.
-  Step 2 (Erfolgskriterien im Browser) bleibt Handarbeit: ein Modell ohne Bildeingang kann die Login-Bilder und die Szene nicht prüfen.
-- [ ] **Step 4: Commit** (falls Korrekturen nötig waren) – `fix: Befunde aus der Gesamtprüfung`
+  Lauf 2026-11-07 mit echtem Chrome (chrome-launcher, `--headless=new`, Fenster 412×823), Mobile-Emulation
+  412×823 bei DPR 1,75, Throttling 150 ms RTT und 4× CPU, Lighthouse 13.6. Der `NO_FCP`-Fehler vom
+  letzten Lauf erschien nicht.
+
+  - `/login` (ohne Sitzung): Performance **100**, Accessibility **100**. FCP 1,23 s, SI 1,49 s, TBT 62 ms,
+    TTI 3,49 s, LCP 1,23 s, CLS 0.
+  - `/dashboard` (mit Sitzung, Login über `/api/auth/sign-in/username`, Cookie per CDP gesetzt):
+    Performance **98**, Accessibility **100**. FCP 1,71 s, SI 2,35 s, TBT 112 ms, TTI 4,08 s, LCP 1,71 s, CLS 0.
+
+  Zwei Befunde aus dem Lauf, beide behoben (Commit `fix: Befunde aus der Gesamtprüfung`):
+
+  1. **`aria-prohibited-attr` im Dashboard-Chart.** `aria-label` auf einem `div` ohne Rolle wird von axe
+     verworfen – der Name kam bei 96 durch, aber der Chart war für Screenreader nicht benannt.
+     Root Cause: `ChartContainer` in `revenue-chart.tsx` trug `aria-label` ohne Rolle.
+     TDD: erst `src/features/dashboard/components/revenue-chart.test.tsx` (rot – `getByRole("img")` findet
+     nichts), dann `role="img"` am Container, grün. Dazu `tests/e2e/dashboard.spec.ts` mit derselben
+     Erwartung (rot gegen den alten Build, grün nach dem Fix).
+     Nach dem Fix: Accessibility **100** und Agentic Browsing **100** (vorher 96 und 50).
+  2. **CSP-Verstoß auf `/login` (`kEvalViolation`).** Der Client-Bundle rief `Function("")`: Zod v4 prüft
+     beim ersten Parsen, ob es kompilieren darf. Die CSP (`script-src 'self' 'unsafe-inline'`, Spec 13.6)
+     lässt das nicht zu.
+     Root Cause: Zod v4 kompiliert Validator mit `new Function` und prüft das beim ersten Parsen mit der
+     Probe `Function("")`. Die CSP verbietet die Ausführung im Browser.
+     Fix: `src/lib/zod.ts` setzt `z.config({ jitless: true })` – die Kompilierung bleibt aus – und die
+     Fachmodule importieren `z` daraus (`import { z } from "@/lib/zod"`).
+     TDD: erst `src/lib/zod.test.ts` (rot – das Parsen erreicht `new Function`), dann der Fix, grün.
+     Playwright sieht CSP-Verstöße nicht in der Konsole (DevTools zeigt sie nur im Issues-Panel), darum zählt
+     der Test die `Function`-Aufrufe im Browser – rot mit 1, grün mit 0.
+     Nach dem Fix ist die Konsole auf `/login` wieder leer.
+
+  Fallstrick für den `/login`-Wert: mit Sitzung leitet `/login` auf `/dashboard` um, und Lighthouse bewertet
+  dann das Dokument nach dem Redirect (Performance 73, `mainDocumentUrl = /dashboard`). Für `/login` muss die
+  Sitzung leer sein.
+- [x] **Step 4: Commit** (falls Korrekturen nötig waren) – `fix: Befunde aus der Gesamtprüfung`
+  Commit 2026-11-07: `fix: Befunde aus der Gesamtprüfung` (Chart-Rolle, Zod jitless) und
+  `chore: chrome-remote-interface für die Lighthouse-Läufe`.
