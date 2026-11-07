@@ -50,6 +50,7 @@
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "6.2.1",
     "@vitest/coverage-v8": "5.1.0",
+    "chrome-remote-interface": "0.34.0",
     "esbuild": "0.28.2",
     "eslint": "^9",
     "eslint-config-next": "16.4.5",
