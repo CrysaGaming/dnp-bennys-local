@@ -228,5 +228,10 @@ Seed laufen jedes Mal wieder durch, weil das Skript vor dem Fehler fertig wird. 
 `src/lib/auth-url.ts` den Wert (fehlt das Schema, wird `https://` gesetzt) und `src/lib/auth.ts` nutzt
 `baseURL` und `trustedOrigins` aus dieser Funktion. Guard: `src/lib/auth-url.test.ts`.
 
-In der Compose steht `BETTER_AUTH_URL=${SERVICE_FQDN_APP_3000}` ohne `https:`-Vorpräfix – sonst steht
-eventuell `https://https://…` da, wenn Coolify die Variable mit Schema liefert.
+In der Compose steht `BETTER_AUTH_URL=${COOLIFY_URL}` – Coolify legt die öffentliche URL mit Schema in den
+Container. Die FQDN-Variable mit Port (`SERVICE_FQDN_APP_3000`) bleibt als eigene Zeile stehen, damit Coolify
+den Port für den Proxy kennt. Der Code nimmt `COOLIFY_URL` vor `BETTER_AUTH_URL` und normalisiert beides.
+
+Nachprüft, beide Formen: mit `COOLIFY_URL=https://bennys.crysatec.com` läuft der Container, und mit dem
+Wert aus dem Fehlerprotokoll (`bennys.crysatec.com:3000`) startet er auch – vorher crashte er beim Import
+und lief in die Restart-Schleife (Health `healthy`, `/api/health` grün).
