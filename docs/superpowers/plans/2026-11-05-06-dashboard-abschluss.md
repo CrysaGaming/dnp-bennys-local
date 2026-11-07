@@ -190,6 +190,20 @@ Nachlauf 2026-11-07 nach den zwei Fixes aus Step 3: Typecheck grün, Lint grün 
   Fallstrick für den `/login`-Wert: mit Sitzung leitet `/login` auf `/dashboard` um, und Lighthouse bewertet
   dann das Dokument nach dem Redirect (Performance 73, `mainDocumentUrl = /dashboard`). Für `/login` muss die
   Sitzung leer sein.
+
+  Der Lauf läuft jetzt mit `scripts/audit.mjs` (echter Chrome über chrome-launcher, `--headless=new`, Fenster
+  412×823, Mobile-Emulation, simulates Throttling). Zwei Fehler darin waren die eigentliche Ursache für den
+  ausbleibenden Dashboard-Wert:
+  1. `lighthouse(url, opts, flags)` – die Signatur ist `lighthouse(url, flags, config)`. Mit der falschen
+     Reihenfolge kam `No artifacts were defined on the config`, und der LHR liegt in Lighthouse 13.6 unter
+     `res.lhr` (nicht `res.lighthouse`). Jetzt: `chrome-remote-interface` als Dev-Dependency, `defaultConfig`
+     als drittes Argument.
+  2. Der Playwright-Storage-State reicht nicht: der Cookie liegt im Jar, aber der Dokument-Request von
+     Lighthouse kommt ohne ihn an – die Antwort ist die Umleitung auf `/login`. Die Session wird jetzt über
+     den echten Login (`/api/auth/sign-in/username`) geholt und per `Network.setCookie` auf Browserebene
+     gesetzt. Die Zugangsdaten kommen aus `.env` (`SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD`), nicht aus dem
+     Repo.
+  `reportLine` markiert die Umleitung – das ist der Test, der diesen Fall fängt (`lighthouse-report.test.ts`).
 - [x] **Step 4: Commit** (falls Korrekturen nötig waren) – `fix: Befunde aus der Gesamtprüfung`
   Commit 2026-11-07: `fix: Befunde aus der Gesamtprüfung` (Chart-Rolle, Zod jitless) und
   `chore: chrome-remote-interface für die Lighthouse-Läufe`.
