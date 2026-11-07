@@ -159,3 +159,32 @@ docker compose -p testohne -f docker-compose.yml config
 docker compose --env-file <test-env> -p deployp -f docker-compose.yml up -d --build
 → deployp-app-1 Up (healthy), deployp-db-1 Up (healthy), /api/health {"status":"ok","db":"ok"}
 ```
+
+### Was Coolify mit den Variablen wirklich macht (aus dem Coolify-Repo, Stand 2026-11-07)
+
+- `app/Jobs/ApplicationDeploymentJob.php` (Zeile ~954): Coolify hängt **jeden** Compose-Dienst an seine
+  eigene Env-Datei an – `env_file: .env` wird automatisch gesetzt – und ruft Compose mit
+  `--env-file <artifacts>/<uuid>/.env --project-directory <artifacts>/<uuid>`. Die Datei legt Coolify aus
+  seinen Variables an. Darum steht in der Compose jetzt nur `env_file: .env`, keine Interpolation.
+- `app/Actions/Database/StartPostgresql.php` (Zeile ~289): das generierte Passwort bekommt nur eine
+  **Coolify-Datenbank-Ressource** (`POSTGRES_PASSWORD`, und `PGPASSWORD` für den Healthcheck). Ein `db`-Dienst
+  im eigenen Compose-File bekommt davon nichts – genau das war der Fall beim Lauf vom 14:58: leere
+  Variable, leeres Passwort, Postgres initialisiert nicht, `depends_on` wirft die App raus.
+- `ApplicationDeploymentJob` (~3190): Coolify liest den Health-Status mit `docker inspect`. Ohne
+  HEALTHCHECK im Image steht der Status auf `none`. Darum sitzt der Check jetzt im Dockerfile
+  (`wget -qO- http://127.0.0.1:3000/api/health`), nicht nur in der Compose.
+
+**Daraus die empfohlene Form** (die, die bei homestate-portal läuft): Postgres als Coolify-Ressource,
+`DATABASE_URL` kommt von Coolify. Die Compose im Root enthält nur die App. Wer die Datenbank doch im
+Compose haben will, muss `POSTGRES_PASSWORD` in Coolify setzen – Coolify generiert es für einen
+Compose-Dienst nicht.
+
+Nachprüfung der App-Compose (Testlauf, Werte aus einer Env-Datei außerhalb des Repos):
+
+```
+docker compose -f docker-compose.yml -f tmp/override.yml -p testapp up -d --build
+docker inspect --format '{{.State.Health.Status}}' testapp-app-1   → healthy
+/api/health → {"status":"ok","db":"ok"}
+/app/uploads → drwxr-xr-x app app, schreiben als app ✓
+Healthcheck-Log: ExitCode 0, Output {"status":"ok","db":"ok"}
+```

@@ -28,6 +28,10 @@ ENV PORT=3000
 # Container-ID, darum hört der Server nur auf der eigenen IP – ein Healthcheck im Container auf
 # `localhost:3000` gibt Connection refused und Coolify stellt die App als unhealthy ab.
 ENV HOSTNAME=0.0.0.0
+# Der Standard für den Upload-Ordner. Coolify kann ihn in der Env-Datei setzen;
+# ohne den Wert hier fällt er auf das lokale ./tmp/uploads zurück, das der Container-Benutzer
+# in /app nicht anlegen darf.
+ENV UPLOAD_DIR=/app/uploads
 
 RUN addgroup -S app && adduser -S app -G app
 
@@ -56,4 +60,8 @@ RUN mkdir -p /app/uploads && chown -R app:app /app/uploads
 
 USER app
 EXPOSE 3000
+# Coolify liest den Health-Status mit `docker inspect` – ohne HEALTHCHECK im Bild steht er auf none.
+# busybox wget ist in Alpine da, curl nicht. Und 127.0.0.1, nicht localhost: busybox löst
+# localhost auf ::1 auf, der Server horcht auf IPv4.
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=5 CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1
 ENTRYPOINT ["./docker-entrypoint.sh"]
