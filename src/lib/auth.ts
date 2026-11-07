@@ -3,12 +3,13 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { admin, username } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import { prisma } from "./prisma";
-import { authBaseUrl } from "./auth-url";
+import { authBaseUrl, authSecret } from "./auth-url";
 
 const baseUrl = authBaseUrl();
 
 /** Better-Auth-Config nach Spec 3.2. `nextCookies()` muss das letzte Plugin sein. */
 export const auth = betterAuth({
+  secret: authSecret(),
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   baseURL: baseUrl,
   trustedOrigins: [baseUrl],

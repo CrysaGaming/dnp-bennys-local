@@ -235,3 +235,22 @@ den Port für den Proxy kennt. Der Code nimmt `COOLIFY_URL` vor `BETTER_AUTH_URL
 Nachprüft, beide Formen: mit `COOLIFY_URL=https://bennys.crysatec.com` läuft der Container, und mit dem
 Wert aus dem Fehlerprotokoll (`bennys.crysatec.com:3000`) startet er auch – vorher crashte er beim Import
 und lief in die Restart-Schleife (Health `healthy`, `/api/health` grün).
+
+### Der laufende Deploy (2026-11-07, 15:50) – so sieht der Erfolg aus
+
+```
+Container postgres-... Healthy
+Container app-... Started
+New container started.
+```
+
+Coolify hat die `SERVICE_*`-Platzhalter selbst erzeugt und als Build-Args durchgereicht
+(`--build-arg SERVICE_PASSWORD_POSTGRES`, `SERVICE_BASE64_64_APP`, `SERVICE_USER_APP`,
+`SERVICE_PASSWORD_APP`). Die Runtime-Env-Datei wird danach aus den Runtime-Variablen geschrieben –
+darum funktioniert `BETTER_AUTH_URL=${COOLIFY_URL}` ohne etwas zu setzen.
+
+Ein Rest aus dem Build: während des Prärenderns ist die Runtime-Env noch nicht da, und Better Auth
+meldete sechsmal „You are using the default secret“. Der Build lief durch, aber die Meldung ist Müll.
+`authSecret()` gibt jetzt nur für `NEXT_PHASE=phase-production-build` einen Platzhalter – in Produktion
+bleibt es beim Fehler, wenn das Secret fehlt. Nachprüfung: Build ohne Secret,Build编译, 0
+Meldungen.
