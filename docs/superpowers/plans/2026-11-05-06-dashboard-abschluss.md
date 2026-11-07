@@ -265,3 +265,13 @@ Login-Bilder: alle fünf in `public/login/` sind 1920×1080 WebP, unter 250 KB (
 und stehen in `CREDITS.md`; die Alt-Texte in `images.ts` entsprechen den Beschreibungen dort.
 
 - [x] **Step 5: Commit** – `fix(login): HUD-Schatten und Token-Contrast auf AA`
+
+Der Fall mit dem fremden Server auf 3100 trat beim letzten Lauf wieder ein: `reuseExistingServer` nahm einen
+von Hand gestarteten Standalone-Server (Dev-DB, ohne `BETTER_AUTH_URL` und ohne die Playwright-Umgebung) –
+`time.spec.ts` fiel, weil die Tests gegen die falsche Datenbank liefen. Vor dem Suite-Lauf darf auf 3100 nichts
+hören; der eigene Server von Playwright muss den Port bekommen. Nach dem Aufräumen: 51 Tests grün.
+
+- [x] **Step 6: battery** – typecheck ✓, lint ✓ (eine bekannte TanStack-Warnung), unit 211 ✓, integration 157 ✓,
+  e2e 51 ✓. Screenshots: `docs/screenshots/` (Login-Szene mit Schatten, Dashboard dunkel und hell).
+
+- [x] **Step 7: Commit** – `docs(pläne): Screenshots der Prüfung und die Contrast-Zahlen`
