@@ -204,6 +204,11 @@ Nachlauf 2026-11-07 nach den zwei Fixes aus Step 3: Typecheck grün, Lint grün 
      gesetzt. Die Zugangsdaten kommen aus `.env` (`SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD`), nicht aus dem
      Repo.
   `reportLine` markiert die Umleitung – das ist der Test, der diesen Fall fängt (`lighthouse-report.test.ts`).
+  Beim Nachlauf lief ein von Hand gestarteter Server auf 3100 (ohne die Playwright-Umgebung, darum ohne
+  `BETTER_AUTH_URL`) – `reuseExistingServer` nahm ihn und jede Seite leitete auf `/login` um. Vor dem Lauf muss
+  Port 3100 frei sein.
 - [x] **Step 4: Commit** (falls Korrekturen nötig waren) – `fix: Befunde aus der Gesamtprüfung`
-  Commit 2026-11-07: `fix: Befunde aus der Gesamtprüfung` (Chart-Rolle, Zod jitless) und
+  Commits 2026-11-07: `fix(dashboard): Chart-Container braucht eine Rolle für den aria-label`,
+  `fix(csp): Zod im jitless-Modus – die CSP erlaubt keine neue Function`,
+  `fix(scripts): audit.mjs läuft jetzt – falsche Argumentreihenfolge und Session auf Browserebene`,
   `chore: chrome-remote-interface für die Lighthouse-Läufe`.
