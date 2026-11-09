@@ -22,11 +22,11 @@ test("knappe Teile und zu große Abbuchung", async ({ page }) => {
   const row = page.getByRole("row", { name: new RegExp(name) });
   await expect(row).toContainText("knapp");
 
-  // Zugang 3: der Bestand bleibt unter dem Mindestbestand, die Zeile bleibt knapp.
+  // Wareneingang 3: der Bestand bleibt unter dem Mindestbestand, die Zeile bleibt knapp.
   await row.getByRole("button", { name: "Buchen" }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("combobox", { name: "Art" }).click();
-  await page.getByRole("option", { name: "Zugang" }).click();
+  await page.getByRole("option", { name: "Wareneingang" }).click();
   await dialog.getByRole("spinbutton", { name: "Menge" }).fill("3");
   await dialog.getByRole("button", { name: "Buchen" }).click();
 
@@ -50,7 +50,7 @@ test("knappe Teile und zu große Abbuchung", async ({ page }) => {
   await expect(row).toContainText("2");
   // Historie.
   await row.getByRole("button", { name: "Historie" }).click();
-  await expect(page.getByText("+3 Stk Zugang")).toBeVisible();
+  await expect(page.getByText("+3 Stk Wareneingang")).toBeVisible();
   await expect(page.getByText("-1 Stk Verlust")).toBeVisible();
   await expect(page.getByText("Diebstahl E2E")).toBeVisible();
 });

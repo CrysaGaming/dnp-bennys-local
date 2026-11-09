@@ -47,14 +47,14 @@ export const bookingSchema = z
       }
     }
 
-    // Zugang und Verlust wirken ins Lager hinein, eine Korrektur in beide Richtungen.
+    // Wareneingang und Verlust wirken ins Lager hinein, eine Korrektur in beide Richtungen.
     if ((val.kind === "PURCHASE" || val.kind === "LOSS") && val.amount <= 0) {
       ctx.addIssue({
         code: "custom",
         path: ["amount"],
         message:
           val.kind === "PURCHASE"
-            ? "Zugang: die Menge muss größer als 0 sein."
+            ? "Wareneingang: die Menge muss größer als 0 sein."
             : "Verlust: die Menge muss größer als 0 sein.",
       });
     }

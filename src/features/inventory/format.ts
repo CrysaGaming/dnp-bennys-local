@@ -1,8 +1,8 @@
 import type { StockMovementReason } from "@/generated/prisma/enums";
 
 const LABEL: Record<StockMovementReason, string> = {
-  PURCHASE: "Zugang",
-  ORDER_USAGE: "Auftrag",
+  PURCHASE: "Wareneingang",
+  ORDER_USAGE: "Entnahme",
   CORRECTION: "Korrektur",
   LOSS: "Verlust",
 };

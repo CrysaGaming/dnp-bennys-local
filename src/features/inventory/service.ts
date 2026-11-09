@@ -122,7 +122,7 @@ export async function bookMovement(ctx: SessionContext, input: unknown) {
     const part = await tx.part.findUnique({ where: { id: booking.partId } });
     if (!part) throw new NotFoundError("Teil nicht gefunden.");
 
-    // Zugang und Verlust wirken in den Bestand hinein, Korrektur in beide Richtungen.
+    // Wareneingang und Verlust wirken in den Bestand hinein, Korrektur in beide Richtungen.
     const delta = booking.kind === "LOSS" ? -booking.amount : booking.amount;
 
     const after = await bookStock(tx, {

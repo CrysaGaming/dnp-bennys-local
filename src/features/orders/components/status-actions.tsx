@@ -11,7 +11,7 @@ const STATUS_LABEL: Record<string, string> = {
   OPEN: "Offen",
   IN_PROGRESS: "In Arbeit",
   DONE: "Erledigt",
-  CANCELLED: "Storniert",
+  CANCELLED: "Abgebrochen",
 };
 
 const ACTION_LABEL = (to: string) => (to === "CANCELLED" ? "Stornieren" : STATUS_LABEL[to]);

@@ -15,7 +15,7 @@ import {
 import { book } from "../actions";
 
 const KINDS = [
-  { value: "PURCHASE", label: "Zugang" },
+  { value: "PURCHASE", label: "Wareneingang" },
   { value: "CORRECTION", label: "Korrektur" },
   { value: "LOSS", label: "Verlust" },
 ] as const;

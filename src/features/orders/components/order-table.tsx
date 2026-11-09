@@ -38,7 +38,7 @@ const STATUSES = [
   ["OPEN", "Offen"],
   ["IN_PROGRESS", "In Arbeit"],
   ["DONE", "Erledigt"],
-  ["CANCELLED", "Storniert"],
+  ["CANCELLED", "Abgebrochen"],
 ] as const;
 
 /** Auftragsliste (Spec 5.6). Die Filter stehen in der URL, damit ein Link Teil einer Liste ist. */

@@ -66,7 +66,7 @@ export function PayDialog({
             </div>
             <div className="flex items-center gap-2">
               <RadioGroupItem value="BANK" id="pay-bank" />
-              <Label htmlFor="pay-bank">Bank</Label>
+              <Label htmlFor="pay-bank">Überweisung</Label>
             </div>
           </RadioGroup>
         </div>
