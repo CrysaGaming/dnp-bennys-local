@@ -174,6 +174,10 @@ export function CompanySettingsForm({
                 <Label htmlFor="status-modus">Status-Modus</Label>
                 <Select
                   value={form.statusMode}
+                  items={[
+                    { value: "AUTO", label: "Automatisch" },
+                    { value: "MANUAL", label: "Manuell" },
+                  ]}
                   onValueChange={(value) => set("statusMode", value as CompanySettingsInput["statusMode"])}
                   disabled={!canManage}
                 >

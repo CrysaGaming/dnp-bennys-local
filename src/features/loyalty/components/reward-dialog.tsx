@@ -96,7 +96,11 @@ export function RewardDialog({
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="reward-type">Art</Label>
-          <Select value={type} onValueChange={(value) => value && setType(value as (typeof TYPES)[number]["value"])}>
+          <Select
+            value={type}
+            items={TYPES}
+            onValueChange={(value) => value && setType(value as (typeof TYPES)[number]["value"])}
+          >
             <SelectTrigger id="reward-type" aria-label="Art">
               <SelectValue />
             </SelectTrigger>
@@ -113,7 +117,11 @@ export function RewardDialog({
         {type === "FREE_SERVICE" ? (
           <div className="flex flex-col gap-2">
             <Label htmlFor="reward-item">Leistung</Label>
-            <Select value={priceListItemId} onValueChange={(value) => value && setPriceListItemId(value)}>
+            <Select
+              value={priceListItemId}
+              items={items.map((item) => ({ value: item.id, label: item.name }))}
+              onValueChange={(value) => value && setPriceListItemId(value)}
+            >
               <SelectTrigger id="reward-item" aria-label="Leistung">
                 <SelectValue placeholder="Leistung wählen" />
               </SelectTrigger>

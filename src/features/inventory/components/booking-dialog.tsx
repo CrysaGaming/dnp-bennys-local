@@ -76,7 +76,11 @@ export function BookingDialog({
     >
         <div className="flex flex-col gap-2">
           <Label htmlFor="booking-kind">Art</Label>
-          <Select value={kind} onValueChange={(value) => value && setKind(value as (typeof KINDS)[number]["value"])}>
+          <Select
+            value={kind}
+            items={KINDS}
+            onValueChange={(value) => value && setKind(value as (typeof KINDS)[number]["value"])}
+          >
             <SelectTrigger id="booking-kind" aria-label="Art">
               <SelectValue />
             </SelectTrigger>

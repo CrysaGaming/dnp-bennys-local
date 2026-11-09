@@ -83,7 +83,11 @@ export function OrderTable({
 
         <div className="flex flex-col gap-1">
           <Label htmlFor="order-status">Status</Label>
-          <Select value={filter.status ?? ""} onValueChange={(value) => value && apply({ ...filter, status: value })}>
+          <Select
+            value={filter.status ?? ""}
+            items={[{ value: "", label: "Alle" }, ...STATUSES.map(([value, label]) => ({ value, label }))]}
+            onValueChange={(value) => value && apply({ ...filter, status: value })}
+          >
             <SelectTrigger id="order-status" aria-label="Status">
               <SelectValue placeholder="Alle" />
             </SelectTrigger>
@@ -100,7 +104,11 @@ export function OrderTable({
 
         <div className="flex flex-col gap-1">
           <Label htmlFor="order-type">Typ</Label>
-          <Select value={filter.type ?? ""} onValueChange={(value) => value && apply({ ...filter, type: value })}>
+          <Select
+            value={filter.type ?? ""}
+            items={[{ value: "", label: "Alle" }, ...TYPES.map(([value, label]) => ({ value, label }))]}
+            onValueChange={(value) => value && apply({ ...filter, type: value })}
+          >
             <SelectTrigger id="order-type" aria-label="Typ">
               <SelectValue placeholder="Alle" />
             </SelectTrigger>
@@ -117,7 +125,11 @@ export function OrderTable({
 
         <div className="flex flex-col gap-1">
           <Label htmlFor="order-employee">Mitarbeiter</Label>
-          <Select value={filter.employeeId ?? ""} onValueChange={(value) => value && apply({ ...filter, employeeId: value })}>
+          <Select
+            value={filter.employeeId ?? ""}
+            items={[{ value: "", label: "Alle" }, ...employees.map((employee) => ({ value: employee.id, label: employee.name }))]}
+            onValueChange={(value) => value && apply({ ...filter, employeeId: value })}
+          >
             <SelectTrigger id="order-employee" aria-label="Mitarbeiter">
               <SelectValue placeholder="Alle" />
             </SelectTrigger>

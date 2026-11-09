@@ -89,7 +89,11 @@ export function NewOrderForm({
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="order-type">Typ</Label>
-        <Select value={type} onValueChange={(value) => value && setType(value)}>
+        <Select
+          value={type}
+          items={TYPES.map(([value, label]) => ({ value, label }))}
+          onValueChange={(value) => value && setType(value)}
+        >
           <SelectTrigger id="order-type" aria-label="Typ">
             <SelectValue />
           </SelectTrigger>
@@ -105,7 +109,11 @@ export function NewOrderForm({
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="order-vehicle">Fahrzeug</Label>
-        <Select value={vehicleId} onValueChange={(value) => value && setVehicleId(value)}>
+        <Select
+          value={vehicleId}
+          items={vehicles.map((vehicle) => ({ value: vehicle.id, label: vehicle.plate }))}
+          onValueChange={(value) => value && setVehicleId(value)}
+        >
           <SelectTrigger id="order-vehicle" aria-label="Fahrzeug">
             <SelectValue placeholder="Kein Fahrzeug" />
           </SelectTrigger>

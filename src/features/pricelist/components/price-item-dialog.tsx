@@ -105,7 +105,11 @@ export function PriceItemDialog({
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="item-category">Kategorie</Label>
-          <Select value={categoryId} onValueChange={(value) => value && setCategoryId(value)}>
+          <Select
+            value={categoryId}
+            items={list.map((c) => ({ value: c.id, label: c.name }))}
+            onValueChange={(value) => value && setCategoryId(value)}
+          >
             <SelectTrigger id="item-category" aria-label="Kategorie">
               <SelectValue placeholder="Kategorie wählen" />
             </SelectTrigger>
@@ -122,7 +126,14 @@ export function PriceItemDialog({
         {parts ? (
           <div className="flex flex-col gap-2">
             <Label htmlFor="item-part">Teil</Label>
-            <Select value={partId} onValueChange={(value) => value && setPartId(value)}>
+            <Select
+              value={partId}
+              items={[
+                { value: "", label: "ohne Teil" },
+                ...(parts ?? []).map((p) => ({ value: p.id, label: p.name })),
+              ]}
+              onValueChange={(value) => value && setPartId(value)}
+            >
               <SelectTrigger id="item-part" aria-label="Teil">
                 <SelectValue placeholder="ohne Teil" />
               </SelectTrigger>

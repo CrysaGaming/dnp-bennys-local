@@ -59,7 +59,11 @@ export function PreferencesForm({
     <form className="flex flex-col gap-4" noValidate onSubmit={submit}>
       <div className="flex flex-col gap-2">
         <Label htmlFor="theme">Theme</Label>
-        <Select value={chosenTheme} onValueChange={(value) => setChosenTheme(String(value) as PreferencesInput["theme"])}>
+        <Select
+          value={chosenTheme}
+          items={Object.entries(THEME_LABELS).map(([value, label]) => ({ value, label }))}
+          onValueChange={(value) => setChosenTheme(String(value) as PreferencesInput["theme"])}
+        >
           <SelectTrigger id="theme" className="w-40">
             <SelectValue />
           </SelectTrigger>

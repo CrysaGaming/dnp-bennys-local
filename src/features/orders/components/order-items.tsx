@@ -72,7 +72,13 @@ export function OrderItems({
         <div className="flex flex-wrap items-end gap-3 mb-4">
           <div className="flex flex-col gap-1 min-w-64">
             <Label htmlFor="item-price-list">Leistung</Label>
-            <Select value={priceItemId} onValueChange={(value) => value && setPriceItemId(value)}>
+            <Select
+              value={priceItemId}
+              items={groups.flatMap((group) =>
+                group.items.map((item) => ({ value: item.id, label: `${item.name} · ${formatMoney(item.price)}` })),
+              )}
+              onValueChange={(value) => value && setPriceItemId(value)}
+            >
               <SelectTrigger id="item-price-list" aria-label="Leistung">
                 <SelectValue placeholder="Leistung wählen" />
               </SelectTrigger>

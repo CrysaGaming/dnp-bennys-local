@@ -94,7 +94,11 @@ export function ResourceEditDialog({
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="edit-category">Kategorie</Label>
-          <Select value={category} onValueChange={(value) => value && setCategory(value as ResourceCategory)}>
+          <Select
+            value={category}
+            items={Object.fromEntries(CATEGORY_ORDER.map((c) => [c, CATEGORY_LABEL[c]]))}
+            onValueChange={(value) => value && setCategory(value as ResourceCategory)}
+          >
             <SelectTrigger id="edit-category" aria-label="Kategorie">
               <SelectValue />
             </SelectTrigger>

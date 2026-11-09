@@ -90,7 +90,11 @@ export function EmployeeForm({
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="rank">Rang</Label>
-        <Select value={rankId} onValueChange={(value) => value && setRankId(value)}>
+        <Select
+          value={rankId}
+          items={ranks.map((rank) => ({ value: rank.id, label: `${rank.name} (Level ${rank.level})` }))}
+          onValueChange={(value) => value && setRankId(value)}
+        >
           <SelectTrigger id="rank" aria-label="Rang">
             <SelectValue placeholder="Rang wählen" />
           </SelectTrigger>
