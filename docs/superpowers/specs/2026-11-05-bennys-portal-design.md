@@ -460,7 +460,7 @@ Vor dem Abschluss die Kontraste prüfen (WCAG AA ≥ 4.5:1 für Text). Deshalb s
 | `/profil` | Avatar-Upload, IC-Name, Telefon, Rang (nur lesen), eigene Statistik | alle |
 | `/settings` | Passwort ändern, Theme-Vorgabe, „Bewegungen reduzieren“, Musik im Dashboard an/aus und Lautstärke, aktive Sessions mit „Überall abmelden“ | alle |
 
-**Formulare (bestätigt, 2026-11-08):** Anlegen und Bearbeiten öffnet überall ein Modal mittig – dieselbe Hülle aus Titel, einzeiliger Erklärung, scrollendem Körper und Fußzeile mit „Abbrechen“ und Speichern. Bewusst inline bleiben die mehrstufigen Seiten  und , die Ressourcen-Schnelleingabe (5.8) und das Kategorie-Schnellformular der Preisliste: Dort rückt nach dem Speichern der Fokus ins nächste Feld zurück, weil man mehrere Sätze hintereinander eingibt.
+**Formulare (bestätigt, 2026-11-08):** Anlegen und Bearbeiten öffnet überall ein Modal mittig – dieselbe Hülle aus Titel, einzeiliger Erklärung, scrollendem Körper und Fußzeile mit „Abbrechen“ und Speichern. Bewusst inline bleiben die mehrstufigen Seiten `/kunden/neu` und `/auftraege/neu`, die Ressourcen-Schnelleingabe (5.8) und das Kategorie-Schnellformular der Preisliste: Dort rückt nach dem Speichern der Fokus ins nächste Feld zurück, weil man mehrere Sätze hintereinander eingibt.
 ### 5.7 Kundenkarte und Stempelkarte
 
 ```
