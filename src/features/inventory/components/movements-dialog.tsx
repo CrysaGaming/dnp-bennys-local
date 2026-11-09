@@ -2,18 +2,18 @@
 
 import { useEffect, useState } from "react";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { formatDelta, reasonLabel } from "../format";
 import { listMovementsAction } from "../actions";
 import type { MovementRow } from "../movement-types";
 
 /** Bewegungshistorie eines Teils (Spec 5.6) – die letzten 100 Bewegungen. */
-export function MovementsDrawer({
+export function MovementsDialog({
   part,
   open,
   onClose,
@@ -38,12 +38,12 @@ export function MovementsDrawer({
   }, [open, part.id]);
 
   return (
-    <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
-      <SheetContent side="right">
-        <SheetHeader>
-          <SheetTitle>Historie – {part.name}</SheetTitle>
-          <SheetDescription>Letzte Bewegungen, neueste zuerst.</SheetDescription>
-        </SheetHeader>
+    <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
+      <DialogContent className="max-h-[calc(100dvh-3rem)] overflow-y-auto sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Historie – {part.name}</DialogTitle>
+          <DialogDescription>Letzte Bewegungen, neueste zuerst.</DialogDescription>
+        </DialogHeader>
 
         {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
 
@@ -58,7 +58,7 @@ export function MovementsDrawer({
             </li>
           ))}
         </ul>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

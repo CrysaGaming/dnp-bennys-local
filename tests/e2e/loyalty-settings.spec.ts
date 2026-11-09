@@ -66,6 +66,7 @@ test("Prämie mit Gratis-Leistung anlegen", async ({ page }) => {
 
   await page.goto("/kunden/praemien");
 
+  await page.getByRole("button", { name: "Neue Prämie" }).click();
   await page.getByRole("textbox", { name: "Prämienname" }).fill("Gratis Wäsche LSE2E");
   await page.getByRole("combobox", { name: "Art" }).click();
   await page.getByRole("option", { name: "Gratis-Leistung" }).click();
@@ -119,7 +120,7 @@ test("ohne LOYALTY_MANAGE ist alles schreibgeschützt", async ({ page, browser }
 
   await reader.goto("/kunden/praemien");
   await expect(reader.getByRole("heading", { name: "Treueprämien" })).toBeVisible();
-  await expect(reader.getByRole("button", { name: "Speichern" })).toHaveCount(0);
+  await expect(reader.getByRole("button", { name: "Neue Prämie" })).toHaveCount(0);
 
   await context.close();
 });

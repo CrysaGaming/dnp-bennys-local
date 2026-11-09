@@ -2,9 +2,8 @@ import { Suspense } from "react";
 import { requirePagePermission } from "@/lib/dal";
 import { hasPermission } from "@/lib/permissions";
 import { PageHeader } from "@/components/layout/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listParts } from "@/features/inventory/service";
-import { PartSheet } from "@/features/inventory/components/part-sheet";
+import { PartDialog } from "@/features/inventory/components/part-dialog";
 import { PartsTable } from "@/features/inventory/components/parts-table";
 
 async function Content() {
@@ -19,18 +18,8 @@ async function Content() {
       <PageHeader
         title="Lager"
         breadcrumb={[{ label: "Dashboard", href: "/dashboard" }, { label: "Lager" }]}
+        actions={canManage ? <PartDialog /> : null}
       />
-
-      {canManage ? (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Neues Teil</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PartSheet />
-          </CardContent>
-        </Card>
-      ) : null}
 
       <PartsTable parts={parts} canManage={canManage} />
     </>

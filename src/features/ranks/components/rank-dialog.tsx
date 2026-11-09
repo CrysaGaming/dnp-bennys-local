@@ -5,13 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { FormDialog } from "@/components/form-dialog";
 import { withImplied } from "@/lib/permissions";
 import type { Permission } from "@/generated/prisma/enums";
 import { createRankAction, updateRankAction } from "../actions";
@@ -68,15 +62,18 @@ export function RankDialog({ open, onOpenChange, rank, grantable }: RankDialogPr
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>{rank ? `Rang bearbeiten: ${rank.name}` : "Neuer Rang"}</DialogTitle>
-          <DialogDescription>Rechte, die du selbst nicht hast, sind ausgegraut.</DialogDescription>
-        </DialogHeader>
-
-        <form className="flex flex-col gap-4" noValidate onSubmit={submit}>
-          <div className="grid gap-4 sm:grid-cols-2">
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={rank ? `Rang bearbeiten: ${rank.name}` : "Neuer Rang"}
+      description="Rechte, die du selbst nicht hast, sind ausgegraut."
+      submitLabel="Rang speichern"
+      onSubmit={submit}
+      busy={busy}
+      error={error}
+      size="lg"
+    >
+      <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
               <Label htmlFor="rank-name">Name</Label>
               <Input id="rank-name" value={name} onChange={(e) => setName(e.target.value)} />
@@ -130,24 +127,6 @@ export function RankDialog({ open, onOpenChange, rank, grantable }: RankDialogPr
           </div>
 
           <PermissionMatrix value={permissions} onChange={setPermissions} grantable={grantable} />
-
-          {error ? (
-            <p className="text-sm text-destructive" role="alert" aria-live="polite">
-              {error}
-            </p>
-          ) : null}
-
-          {/* Klebt am Modal-Rand, damit die Knöpfe unter dem langen Rechteblock nicht verschwinden. */}
-          <div className="sticky bottom-0 -mx-4 -mb-4 flex justify-end gap-2 border-t bg-popover px-4 py-3">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Abbrechen
-            </Button>
-            <Button type="submit" disabled={busy}>
-              Rang speichern
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
+    </FormDialog>
+      );
+    }

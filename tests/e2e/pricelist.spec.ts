@@ -17,6 +17,7 @@ test("Leistung anlegen, deaktivieren und wieder zeigen", async ({ page }) => {
   await page.getByRole("spinbutton", { name: "Sortierung" }).fill("3");
   await page.getByRole("button", { name: "Kategorie anlegen" }).click();
 
+  await page.getByRole("button", { name: "Neue Leistung" }).click();
   await page.getByRole("textbox", { name: "Leistungsname" }).fill(itemName);
   await page.getByRole("textbox", { name: "Beschreibung" }).fill("Öl und Filter");
   await page.getByRole("spinbutton", { name: "Preis" }).fill("250");
@@ -81,7 +82,7 @@ test("ohne Recht kann man nur lesen", async ({ page, browser }) => {
 
   // Lesen ist für alle, die Knöpfe zum Schreiben bleiben weg.
   await expect(reader.getByRole("button", { name: "Kategorie anlegen" })).toHaveCount(0);
-  await expect(reader.getByRole("button", { name: "Speichern" })).toHaveCount(0);
+  await expect(reader.getByRole("button", { name: "Neue Leistung" })).toHaveCount(0);
   await expect(reader.getByRole("button", { name: "Deaktivieren" })).toHaveCount(0);
 
   await context.close();

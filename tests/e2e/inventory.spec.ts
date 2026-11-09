@@ -12,6 +12,7 @@ test("knappe Teile und zu große Abbuchung", async ({ page }) => {
 
   await page.goto("/lager");
 
+  await page.getByRole("button", { name: "Neues Teil" }).click();
   await page.getByRole("textbox", { name: "Teilname" }).fill(name);
   await page.getByRole("textbox", { name: "Artikelnummer" }).fill("BR-E2E");
   await page.getByRole("spinbutton", { name: "Mindestbestand" }).fill("5");
@@ -97,7 +98,7 @@ test("ohne INVENTORY_MANAGE gibt es keine Knöpfe zum Buchen", async ({ page, br
   await expect(viewer.getByRole("button", { name: "Historie" }).first()).toBeVisible();
 
   await expect(viewer.getByRole("button", { name: "Buchen" })).toHaveCount(0);
-  await expect(viewer.getByRole("button", { name: "Speichern" })).toHaveCount(0);
+  await expect(viewer.getByRole("button", { name: "Neues Teil" })).toHaveCount(0);
 
   await context.close();
 });

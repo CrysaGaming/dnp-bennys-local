@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatMoney } from "@/lib/format";
-import { RewardSheet } from "./reward-sheet";
+import { RewardDialog } from "./reward-dialog";
 import { listRewardsAction, setRewardActiveAction } from "../actions";
 import type { RewardRow } from "../reward-types";
 
@@ -50,7 +50,7 @@ export function RewardTable({
 
   return (
     <>
-      {canManage ? <RewardSheet items={items} onSaved={() => void refresh(showInactive)} /> : null}
+      {canManage ? <RewardDialog items={items} onSaved={() => void refresh(showInactive)} /> : null}
 
       {canManage ? (
         <div className="flex items-center gap-2 mb-4">

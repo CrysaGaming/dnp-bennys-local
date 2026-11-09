@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { formatMoney } from "@/lib/format";
 import { priceListAction, removeCategory, saveCategory, togglePriceItemActive } from "../actions";
-import { PriceItemSheet } from "./price-item-sheet";
+import { PriceItemDialog } from "./price-item-dialog";
 import type { PriceListView } from "../service";
 import type { PartRow } from "@/features/inventory/service";
 
@@ -117,7 +117,7 @@ export function PriceList({
             </Button>
           </form>
 
-          <PriceItemSheet list={data} parts={parts} onSaved={() => void refresh(showInactive)} />
+          <PriceItemDialog list={data} parts={parts} onSaved={() => void refresh(showInactive)} />
         </>
       ) : null}
 

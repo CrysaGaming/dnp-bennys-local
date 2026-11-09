@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { formatMoney } from "@/lib/format";
 import { BookingDialog } from "./booking-dialog";
-import { MovementsDrawer } from "./movements-drawer";
+import { MovementsDialog } from "./movements-dialog";
 import type { PartRow } from "../service";
 
 /**
@@ -75,7 +75,7 @@ export function PartsTable({ parts, canManage }: { parts: PartRow[]; canManage: 
       ) : null}
 
       {history ? (
-        <MovementsDrawer part={history} open onClose={() => setHistory(null)} />
+        <MovementsDialog part={history} open onClose={() => setHistory(null)} />
       ) : null}
     </>
   );
