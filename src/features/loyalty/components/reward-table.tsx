@@ -1,5 +1,7 @@
 "use client";
 
+import { Gift } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,24 +52,32 @@ export function RewardTable({
 
   return (
     <>
-      {canManage ? <RewardDialog items={items} onSaved={() => void refresh(showInactive)} /> : null}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        {canManage ? (
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="show-inactive-rewards"
+              checked={showInactive}
+              onCheckedChange={(checked) => {
+                const on = checked === true;
+                setShowInactive(on);
+                void refresh(on);
+              }}
+            />
+            <Label htmlFor="show-inactive-rewards">Inaktive zeigen</Label>
+          </div>
+        ) : (
+          <span />
+        )}
 
-      {canManage ? (
-        <div className="flex items-center gap-2 mb-4">
-          <Checkbox
-            id="show-inactive-rewards"
-            checked={showInactive}
-            onCheckedChange={(checked) => {
-              const on = checked === true;
-              setShowInactive(on);
-              void refresh(on);
-            }}
-          />
-          <Label htmlFor="show-inactive-rewards">Inaktive zeigen</Label>
-        </div>
-      ) : null}
+        {canManage ? <RewardDialog items={items} onSaved={() => void refresh(showInactive)} /> : null}
+      </div>
 
-      {rows.length === 0 ? <p className="text-sm text-muted-foreground">Noch keine Prämien.</p> : null}
+      {rows.length === 0 ? <EmptyState
+          icon={Gift}
+          title="Noch keine Prämien."
+          hint="Lege die erste Prämie an – Kunden sammeln dann darauf hin."
+        /> : null}
 
       <Table>
         <TableHeader>

@@ -40,7 +40,10 @@ export function AppSidebar({
     >
       <SidebarNav groups={navGroups} />
 
-      {footer && <SidebarFooter>{footer}</SidebarFooter>}
+      {footer && (
+        // Die Stempel-Karte absetzen: Linie und Luft, damit sie nicht mit der Navigation verschmilzt.
+        <SidebarFooter className="border-t border-sidebar-border/70 px-3 py-3">{footer}</SidebarFooter>
+      )}
     </Sidebar>
   );
 }

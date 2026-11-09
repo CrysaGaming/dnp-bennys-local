@@ -1,7 +1,10 @@
 "use client";
 
+import { UserSearch } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCustomerNumber } from "../normalize";
+import { formatPoints } from "@/lib/format";
 import { searchCustomersAction } from "../actions";
 import type { CustomerRow } from "../service";
 
@@ -78,7 +82,11 @@ export function CustomerTable({ rows }: { rows: CustomerRow[] }) {
       </div>
 
       {data.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Keine Kunden gefunden.</p>
+        <EmptyState
+          icon={UserSearch}
+          title="Keine Kunden gefunden."
+          hint="Suche über Name, Rufnummer oder Kennzeichen – ohne Treffer bleibt die Liste leer."
+        />
       ) : (
         <Table>
           <TableHeader>
@@ -89,17 +97,18 @@ export function CustomerTable({ rows }: { rows: CustomerRow[] }) {
               <TableHead>Kennzeichen</TableHead>
               <TableHead>Treuestand</TableHead>
               <TableHead>Letzter Besuch</TableHead>
+              <TableHead><span className="sr-only">Öffnen</span></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.map((customer) => (
-              <TableRow key={customer.id}>
+              <TableRow key={customer.id} className="group relative cursor-pointer">
                 <TableCell>
-                  <Link href={`/kunden/${customer.number}`} className="font-mono">
+                  <Link href={`/kunden/${customer.number}`} className="font-mono after:absolute after:inset-0">
                     {formatCustomerNumber(customer.number)}
                   </Link>
                 </TableCell>
-                <TableCell>{customer.name}</TableCell>
+                <TableCell className="group-hover:underline">{customer.name}</TableCell>
                 <TableCell>{customer.phone ?? "–"}</TableCell>
                 <TableCell>
                   <span className="flex flex-wrap gap-1">
@@ -114,9 +123,15 @@ export function CustomerTable({ rows }: { rows: CustomerRow[] }) {
                     )}
                   </span>
                 </TableCell>
-                <TableCell className="font-mono">{customer.loyaltyBalance}</TableCell>
+                <TableCell className="font-mono tabular-nums">{formatPoints(customer.loyaltyBalance)}</TableCell>
                 <TableCell>
                   {customer.lastVisitAt ? new Date(customer.lastVisitAt).toLocaleDateString("de-DE") : "–"}
+                </TableCell>
+                <TableCell className="text-right align-middle">
+                  <ChevronRight
+                    aria-hidden
+                    className="size-4 opacity-0 transition-opacity group-hover:opacity-60 group-focus-within:opacity-60"
+                  />
                 </TableCell>
               </TableRow>
             ))}

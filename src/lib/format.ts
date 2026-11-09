@@ -11,6 +11,11 @@ export function formatMoney(amount: number): string {
   return `${sign}$${new Intl.NumberFormat("de-DE").format(Math.abs(amount))}`;
 }
 
+/** Punkte oder Stempel: `4.300`, `240`. Kein Dollarzeichen – beides sind Einheiten. */
+export function formatPoints(value: number): string {
+  return new Intl.NumberFormat("de-DE").format(value);
+}
+
 /** Gewicht in kg (Eingang Gramm): `1,5 kg`, `25 kg`, `0,125 kg`. */
 export function formatKg(grams: number): string {
   return `${numberFormat.format(grams / 1000)} kg`;

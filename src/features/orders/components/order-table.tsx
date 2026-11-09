@@ -1,5 +1,7 @@
 "use client";
 
+import { ClipboardList } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -133,7 +135,12 @@ export function OrderTable({
         <Button type="submit">Filtern</Button>
       </form>
 
-      {rows.length === 0 ? <p className="text-sm text-muted-foreground">Keine Aufträge.</p> : null}
+      {rows.length === 0 ? <EmptyState
+          icon={ClipboardList}
+          title="Keine Aufträge."
+          hint="Passe die Filter an oder lege einen neuen Auftrag an."
+          action={{ label: "Neuer Auftrag", href: "/auftraege/neu" }}
+        /> : null}
 
       <Table>
         <TableHeader>

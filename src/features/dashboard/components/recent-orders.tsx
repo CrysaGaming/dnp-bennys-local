@@ -1,3 +1,5 @@
+import { ClipboardList } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import Link from "next/link";
 import { formatMoney, formatDateTime } from "@/lib/format";
 import { formatCustomerNumber } from "@/features/customers/normalize";
@@ -9,7 +11,11 @@ export function RecentOrders({ rows }: { rows: RecentOrder[] }) {
     <section className="border border-border rounded-lg p-4">
       <h2 className="font-display text-xl uppercase mb-3">Letzte Aufträge</h2>
 
-      {rows.length === 0 ? <p className="text-sm text-muted-foreground">Keine Aufträge.</p> : null}
+      {rows.length === 0 ? <EmptyState
+          icon={ClipboardList}
+          title="Keine Aufträge."
+          hint="Der neueste Auftrag erscheint hier, sobald jemand anfasst."
+        /> : null}
 
       <ul className="flex flex-col gap-2">
         {rows.map((row) => (

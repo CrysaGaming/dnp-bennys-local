@@ -116,22 +116,25 @@ export function PriceList({
               Kategorie anlegen
             </Button>
           </form>
-
-          <PriceItemDialog list={data} parts={parts} onSaved={() => void refresh(showInactive)} />
         </>
       ) : null}
 
-      <div className="flex items-center gap-2 mb-4">
-        <Checkbox
-          id="show-inactive"
-          checked={showInactive}
-          onCheckedChange={(checked) => {
-            const on = checked === true;
-            setShowInactive(on);
-            void refresh(on);
-          }}
-        />
-        <Label htmlFor="show-inactive">Inaktive zeigen</Label>
+      {/* Links die Filter, rechts der Auslöser fürs Modal – wie auf den anderen Seiten. */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="show-inactive"
+            checked={showInactive}
+            onCheckedChange={(checked) => {
+              const on = checked === true;
+              setShowInactive(on);
+              void refresh(on);
+            }}
+          />
+          <Label htmlFor="show-inactive">Inaktive zeigen</Label>
+        </div>
+
+        {canManage ? <PriceItemDialog list={data} parts={parts} onSaved={() => void refresh(showInactive)} /> : null}
       </div>
 
       {error ? (

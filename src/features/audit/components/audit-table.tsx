@@ -1,5 +1,7 @@
 "use client";
 
+import { ScrollText } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import {
   Table,
   TableBody,
@@ -15,7 +17,11 @@ import type { AuditRow } from "../queries";
 /** Audit-Log (Spec 5.13): Zeit, Person, Aktion, Objekt, Details. Die Details sind ausklappbar. */
 export function AuditTable({ rows, nextHref }: { rows: AuditRow[]; nextHref: string | null }) {
   if (rows.length === 0) {
-    return <p className="text-sm text-muted-foreground">Keine Einträge.</p>;
+    return <EmptyState
+            icon={ScrollText}
+            title="Keine Einträge."
+            hint="Hier landet jede Änderung an Rang, Bestand oder Auftrag."
+          />;
   }
 
   return (
