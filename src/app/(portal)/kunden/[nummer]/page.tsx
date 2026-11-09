@@ -34,6 +34,7 @@ async function Content({ params }: Props) {
         cardSize={settings.cardSize}
         rewards={rewards.map((r) => ({ id: r.id, name: r.name, cost: r.cost, active: r.active }))}
         canManage={hasPermission(ctx, "LOYALTY_MANAGE")}
+        canEdit={hasPermission(ctx, "CUSTOMERS_EDIT")}
       />
     </>
   );

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { CustomerEditDialog } from "./customer-edit-dialog";
 import { formatDateTime } from "@/lib/format";
 import { formatCustomerNumber } from "../normalize";
 import { nextReward } from "@/features/loyalty/card";
@@ -23,12 +24,14 @@ export function CustomerCard({
   cardSize,
   rewards,
   canManage,
+  canEdit,
 }: {
   customer: CustomerDetail;
   mode: "STAMPS" | "POINTS";
   cardSize: number;
   rewards: RewardRow[];
   canManage: boolean;
+  canEdit: boolean;
 }) {
   const [adjustOpen, setAdjustOpen] = useState(false);
   const next = nextReward(rewards, customer.loyaltyBalance);
@@ -38,9 +41,13 @@ export function CustomerCard({
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="font-mono text-lg">Kunde {formatCustomerNumber(customer.number)}</h2>
 
-        <Button variant="outline" render={<Link href={`/auftraege/neu?kunde=${customer.number}`} />}>
-          Neuer Auftrag
-        </Button>
+        <div className="flex items-center gap-2">
+          {canEdit ? <CustomerEditDialog customer={customer} /> : null}
+
+          <Button variant="outline" render={<Link href={`/auftraege/neu?kunde=${customer.number}`} />}>
+            Neuer Auftrag
+          </Button>
+        </div>
       </div>
 
       <p className="text-sm mb-2">

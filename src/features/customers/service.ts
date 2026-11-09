@@ -21,6 +21,7 @@ export type CustomerRow = {
 };
 
 export type CustomerDetail = CustomerRow & {
+  notes: string | null;
   vehicles: Array<{ id: string; model: string; plate: string; color: string | null }>;
   orders: Array<{ id: string; number: number; status: string; total: number; createdAt: Date }>;
   transactions: Array<{
@@ -155,6 +156,7 @@ export async function getCustomerByNumber(ctx: SessionContext, number: number): 
 
   return {
     ...toRow(customer, customer.vehicles.map((v) => v.plate)),
+    notes: customer.notes,
     vehicles: customer.vehicles.map((v) => ({
       id: v.id,
       model: v.model,

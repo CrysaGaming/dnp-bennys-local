@@ -7,20 +7,35 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { saveCustomerAction } from "../actions";
-import { VehicleFields, type VehicleFieldRow } from "./vehicle-fields";
+import { saveCustomerAction, updateCustomerAction } from "../actions";
+import { EMPTY_VEHICLE, VehicleFields, type VehicleFieldRow } from "./vehicle-fields";
 
-/** Kunde anlegen (Spec 5.6). Eine doppelte Rufnummer ist keine Ablehnung, nur ein Hinweis. */
-export function CustomerForm() {
+/** Der Stand, den die Karte mitbringt – dasselbe Schema wie beim Anlegen. */
+export type CustomerFormValues = {
+  id: string;
+  name: string;
+  phone: string | null;
+  notes: string | null;
+  vehicles: Array<{ model: string; plate: string; color: string | null }>;
+};
+
+/**
+ * Kunde anlegen und bearbeiten (Spec 5.6, 5.7). Ohne `customer` wird angelegt, mit
+ * vorausgefüllt geändert – das Erhaltene erkennt die Fachfunktion am Kennzeichen.
+ * Eine doppelte Rufnummer ist keine Ablehnung, nur ein Hinweis.
+ */
+export function CustomerForm({ customer, onSaved }: { customer?: CustomerFormValues; onSaved?: () => void }) {
   const router = useRouter();
 
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [notes, setNotes] = useState("");
-  const [vehicles, setVehicles] = useState<VehicleFieldRow[]>([
-    { model: "", plate: "", color: "" },
-    { model: "", plate: "", color: "" },
-  ]);
+  const [name, setName] = useState(customer?.name ?? "");
+  const [phone, setPhone] = useState(customer?.phone ?? "");
+  const [notes, setNotes] = useState(customer?.notes ?? "");
+  // Ein leeres Fahrzeug ist vorgegeben: fast jeder Kunde bringt eines mit.
+  const [vehicles, setVehicles] = useState<VehicleFieldRow[]>(
+    customer
+      ? customer.vehicles.map((v) => ({ model: v.model, plate: v.plate, color: v.color ?? "" }))
+      : [EMPTY_VEHICLE],
+  );
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -29,14 +44,10 @@ export function CustomerForm() {
     setError(null);
 
     const filled = vehicles.filter((v) => v.model.trim() !== "" || v.plate.trim() !== "");
+    const payload = { name, phone, notes, vehicles: filled };
 
     setBusy(true);
-    const res = await saveCustomerAction({
-      name,
-      phone,
-      notes,
-      vehicles: filled,
-    });
+    const res = customer ? await updateCustomerAction(customer.id, payload) : await saveCustomerAction(payload);
     setBusy(false);
 
     if (!res.ok) {
@@ -44,17 +55,21 @@ export function CustomerForm() {
       return;
     }
 
-    for (const warning of res.data.warnings) toast(warning);
+    if (customer) {
+      toast("Kunde aktualisiert.");
+      router.refresh();
+      onSaved?.();
+      return;
+    }
 
-    toast(`Kunde gespeichert.`);
+    const warnings = (res.data as { warnings?: string[] }).warnings ?? [];
+    for (const warning of warnings) toast(warning);
+    toast("Kunde gespeichert.");
 
     setName("");
     setPhone("");
     setNotes("");
-    setVehicles([
-      { model: "", plate: "", color: "" },
-      { model: "", plate: "", color: "" },
-    ]);
+    setVehicles([EMPTY_VEHICLE]);
 
     router.refresh();
   }
