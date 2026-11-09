@@ -1,24 +1,20 @@
 import { Suspense } from "react";
 import { requirePagePermission } from "@/lib/dal";
-import { PageHeader } from "@/components/layout/page-header";
+import { RouteModal } from "@/components/route-modal";
 import { CustomerForm } from "@/features/customers/components/customer-form";
 
 async function Content() {
   await requirePagePermission("CUSTOMERS_EDIT");
 
   return (
-    <>
-      <PageHeader
-        title="Neuer Kunde"
-        breadcrumb={[
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Kundenkartei", href: "/kunden" },
-          { label: "Neuer Kunde" },
-        ]}
-      />
-
+    <RouteModal
+      title="Neuer Kunde"
+      description="Rufnummer und Kennzeichen prüft die Fachfunktion auf Duplikate."
+      backHref="/kunden"
+      size="lg"
+    >
       <CustomerForm />
-    </>
+    </RouteModal>
   );
 }
 

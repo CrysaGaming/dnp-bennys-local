@@ -82,7 +82,8 @@ test("Auftrag → Rechnung → bezahlt → Stempel → Einlösen", async ({ page
   await page.getByRole("link", { name: "Einlösen" }).click();
 
   await expect(page.getByRole("heading", { name: "Neuer Auftrag" })).toBeVisible();
-  await expect(page.getByText("Zwanzig Prozent E2E").first()).toBeVisible();
+  // Der Text steckt auch im Flugdatensatz der Seite – ohne Bezug zum Dialog gewinnt das Skript.
+  await expect(page.getByRole("dialog").getByText("Zwanzig Prozent E2E")).toBeVisible();
 
   await page.getByRole("button", { name: "Auftrag anlegen" }).click();
   await expect(page).toHaveURL(/\/auftraege\/\d+/);

@@ -12,7 +12,8 @@ import { cn } from "cn";
 
 export type DialogSize = "sm" | "md" | "lg";
 
-const SIZE: Record<DialogSize, string> = {
+/** Breiten für alle Modale – auch die Routen-Modale benutzen sie. */
+export const DIALOG_SIZE: Record<DialogSize, string> = {
   // schmaler Dialog für Bestätigungen und kurze Formulare
   sm: "sm:max-w-md",
   // Standard: ein Anlegen-/Bearbeiten-Formular
@@ -66,7 +67,7 @@ export function FormDialog({
         className={cn(
           // Der Körper scrollt, damit der Fuß mit „Abbrechen“ und Speichern nie verschwindet.
           "flex max-h-[calc(100dvh-3rem)] flex-col overflow-hidden p-0 sm:p-0",
-          SIZE[size],
+          DIALOG_SIZE[size],
         )}
       >
         <DialogHeader className="gap-1 border-b px-4 pt-4 pb-3 pr-12">

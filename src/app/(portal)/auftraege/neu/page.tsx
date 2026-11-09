@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { requirePagePermission } from "@/lib/dal";
 import { hasPermission } from "@/lib/permissions";
-import { PageHeader } from "@/components/layout/page-header";
+import { RouteModal } from "@/components/route-modal";
 import { getCustomerByNumber } from "@/features/customers/service";
 import { listRewards } from "@/features/loyalty/service";
 import { NewOrderForm } from "@/features/orders/components/new-order-form";
@@ -21,15 +21,12 @@ async function Content({ searchParams }: Props) {
   const reward = params.praemie ? rewards.find((r) => r.id === params.praemie) ?? null : null;
 
   return (
-    <>
-      <PageHeader
-        title="Neuer Auftrag"
-        breadcrumb={[
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Aufträge", href: "/auftraege" },
-          { label: "Neuer Auftrag" },
-        ]}
-      />
+    <RouteModal
+      title="Neuer Auftrag"
+      description="Kunde suchen oder anlegen, Fahrzeug und Positionen wählen."
+      backHref="/auftraege"
+      size="lg"
+    >
 
       <NewOrderForm
         initialCustomer={
@@ -39,7 +36,7 @@ async function Content({ searchParams }: Props) {
         }
         reward={reward ? { id: reward.id, name: reward.name } : null}
       />
-    </>
+    </RouteModal>
   );
 }
 
