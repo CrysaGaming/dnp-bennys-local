@@ -5,7 +5,13 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { withImplied } from "@/lib/permissions";
 import type { Permission } from "@/generated/prisma/enums";
 import { createRankAction, updateRankAction } from "../actions";
@@ -15,7 +21,7 @@ import { PermissionMatrix } from "./permission-matrix";
 import { ColorPicker } from "./color-picker";
 import type { RankRow } from "../service";
 
-export type RankSheetProps = {
+export type RankDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** `null` heißt anlegen. */
@@ -23,8 +29,11 @@ export type RankSheetProps = {
   grantable: Permission[];
 };
 
-/** Rang anlegen und bearbeiten – das Sheet öffnet von rechts (Spec 5.9). */
-export function RankSheet({ open, onOpenChange, rank, grantable }: RankSheetProps) {
+/**
+ * Rang anlegen und bearbeiten – das Modal öffnet mittig (Spec 5.9, Entscheidung vom
+ * 2026-11-08: vorher Sheet von rechts). Es wächst mit dem Rechteblock und scrollt dann.
+ */
+export function RankDialog({ open, onOpenChange, rank, grantable }: RankDialogProps) {
   const [name, setName] = useState(rank?.name ?? "");
   const [level, setLevel] = useState(rank?.level ?? 10);
   const [color, setColor] = useState(rank?.color ?? "#A1A1AA");
@@ -59,11 +68,12 @@ export function RankSheet({ open, onOpenChange, rank, grantable }: RankSheetProp
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex flex-col gap-4 overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>{rank ? `Rang bearbeiten: ${rank.name}` : "Neuer Rang"}</SheetTitle>
-        </SheetHeader>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{rank ? `Rang bearbeiten: ${rank.name}` : "Neuer Rang"}</DialogTitle>
+          <DialogDescription>Rechte, die du selbst nicht hast, sind ausgegraut.</DialogDescription>
+        </DialogHeader>
 
         <form className="flex flex-col gap-4" noValidate onSubmit={submit}>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -127,7 +137,8 @@ export function RankSheet({ open, onOpenChange, rank, grantable }: RankSheetProp
             </p>
           ) : null}
 
-          <div className="flex gap-2">
+          {/* Klebt am Modal-Rand, damit die Knöpfe unter dem langen Rechteblock nicht verschwinden. */}
+          <div className="sticky bottom-0 -mx-4 -mb-4 flex justify-end gap-2 border-t bg-popover px-4 py-3">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Abbrechen
             </Button>
@@ -136,7 +147,7 @@ export function RankSheet({ open, onOpenChange, rank, grantable }: RankSheetProp
             </Button>
           </div>
         </form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

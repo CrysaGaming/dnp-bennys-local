@@ -550,7 +550,7 @@ Vor dem Abschluss die Kontraste prüfen (WCAG AA ≥ 4.5:1 für Text). Deshalb s
 │ ● Meister      Level 30    12 Rechte     3 Mitarbeiter   [⋯]        │
 └──────────────────────────────────────────────────────────────────────┘
 
-Rang anlegen / bearbeiten (Sheet von rechts)
+Rang anlegen / bearbeiten (Modal)
 ┌──────────────────────────────────────────────────────────────────────┐
 │ Name [Meister_______]  Level [30] (1–99)  Farbe [■ ▾]  Lohn $ [ 900 ] │
 │ Vorschau: ● MEISTER                                                  │
@@ -572,6 +572,7 @@ Rang anlegen / bearbeiten (Sheet von rechts)
 ```
 
 - **Liste:** Name mit Farbpunkt, Level, Anzahl Rechte, Anzahl Mitarbeiter. Sortiert nach Level, höchster oben.
+- **Editor:** Modal mittig (bestätigt, 2026-11-08; vorher „Sheet von rechts“). „Neuer Rang“ und „Bearbeiten“ öffnen dasselbe Formular. Es wird mit dem Rechteblock so hoch wie der Bildschirm und scrollt dann; „Abbrechen“ und „Rang speichern“ kleben unten.
 - **Felder:**
   - Name: 2–30 Zeichen, eindeutig.
   - Level: 1–99, eindeutig. Der Admin hat fest 100.

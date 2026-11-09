@@ -21,29 +21,29 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/layout/page-header";
-import { RankSheet } from "./rank-sheet";
+import { RankDialog } from "./rank-dialog";
 import { deleteRankAction } from "../actions";
 import type { RankRow } from "../service";
 import type { Permission } from "@/generated/prisma/enums";
 
 /**
- * Ränge-Creator (Spec 5.9): Liste plus Sheet. Ein Rang mit Mitarbeitern lässt sich
+ * Ränge-Creator (Spec 5.9): Liste plus Modal. Ein Rang mit Mitarbeitern lässt sich
  * nicht löschen – der Dialog nennt die Zahl und verlinkt die gefilterte Liste.
  */
 export function RankList({ ranks, grantable }: { ranks: RankRow[]; grantable: Permission[] }) {
   const [editing, setEditing] = useState<RankRow | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
   const [deleting, setDeleting] = useState<RankRow | null>(null);
   const [busy, setBusy] = useState(false);
 
   function openNew() {
     setEditing(null);
-    setSheetOpen(true);
+    setEditorOpen(true);
   }
 
   function openEdit(rank: RankRow) {
     setEditing(rank);
-    setSheetOpen(true);
+    setEditorOpen(true);
   }
 
   async function remove(rank: RankRow) {
@@ -116,12 +116,12 @@ export function RankList({ ranks, grantable }: { ranks: RankRow[]; grantable: Pe
         </TableBody>
       </Table>
 
-      {sheetOpen ? (
+      {editorOpen ? (
         // key erzwingt einen neuen Zustand pro Rang – sonst bleibt der vorherige im Formular.
-        <RankSheet
+        <RankDialog
           key={editing?.id ?? "new"}
           open
-          onOpenChange={setSheetOpen}
+          onOpenChange={setEditorOpen}
           rank={editing}
           grantable={grantable}
         />
