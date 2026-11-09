@@ -24,15 +24,17 @@ const SIZE: Record<DialogSize, string> = {
 export type FormDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  title: string;
+  title: React.ReactNode;
   /** Eine Zeile Erklärung unter dem Titel – wirkt gegen falsche Eingaben. */
-  description?: string;
+  description?: React.ReactNode;
   submitLabel: string;
   onSubmit: (e: React.FormEvent) => void;
   /** Disablet den Absende-Knopf und zeigt, dass die Action läuft. */
   busy?: boolean;
   /** Zusätzlicher Knopf links neben „Abbrechen“, z. B. „Löschen“. */
   secondary?: React.ReactNode;
+  /** Der Absende-Knopf als gefährliche Aktion (z. B. „Stornieren“). */
+  destructive?: boolean;
   /** Fehler der Fachfunktion – steht direkt über den Knöpfen. */
   error?: string | null;
   size?: DialogSize;
@@ -53,6 +55,7 @@ export function FormDialog({
   onSubmit,
   busy = false,
   secondary,
+  destructive = false,
   error,
   size = "md",
   children,
@@ -89,7 +92,7 @@ export function FormDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Abbrechen
             </Button>
-            <Button type="submit" disabled={busy}>
+            <Button type="submit" variant={destructive ? "destructive" : "default"} disabled={busy}>
               {submitLabel}
             </Button>
           </div>

@@ -2,16 +2,9 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { FormDialog } from "@/components/form-dialog";
 import { paidToast } from "../toast-text";
 import { payInvoiceAction } from "../actions";
 
@@ -51,39 +44,33 @@ export function PayDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(next) => (next ? null : onClose())}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Rechnung #{invoice.number} bezahlen</DialogTitle>
-          <DialogDescription>Die Gutschrift gibt es genau einmal – pro Besuch.</DialogDescription>
-        </DialogHeader>
+    <FormDialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
+      title={<>Rechnung #{invoice.number} bezahlen</>}
+      description={<>Die Gutschrift gibt es genau einmal – pro Besuch.</>}
+      submitLabel="Bezahlt"
+      onSubmit={submit}
+      busy={busy}
+      error={error}
+      size="sm"
+    >
+        <div className="flex flex-col gap-2">
+          <Label>Zahlart</Label>
+          <RadioGroup value={method} onValueChange={(value) => value && setMethod(value)}>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="CASH" id="pay-cash" />
+              <Label htmlFor="pay-cash">Bar</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="BANK" id="pay-bank" />
+              <Label htmlFor="pay-bank">Bank</Label>
+            </div>
+          </RadioGroup>
+        </div>
 
-        <form className="flex flex-col gap-4" noValidate onSubmit={submit}>
-          <div className="flex flex-col gap-2">
-            <Label>Zahlart</Label>
-            <RadioGroup value={method} onValueChange={(value) => value && setMethod(value)}>
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value="CASH" id="pay-cash" />
-                <Label htmlFor="pay-cash">Bar</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value="BANK" id="pay-bank" />
-                <Label htmlFor="pay-bank">Bank</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {error ? (
-            <p className="text-sm text-destructive" role="alert" aria-live="polite">
-              {error}
-            </p>
-          ) : null}
-
-          <Button type="submit" disabled={busy}>
-            Bezahlt
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+    </FormDialog>
   );
 }

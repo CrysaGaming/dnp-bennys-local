@@ -2,17 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { FormDialog } from "@/components/form-dialog";
 import {
   Select,
   SelectContent,
@@ -71,66 +64,55 @@ export function ResourceEditDialog({
   }
 
   return (
-    <Dialog open={open}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Ressource bearbeiten</DialogTitle>
-          <DialogDescription>Der Name bleibt in der Liste der einzige.</DialogDescription>
-        </DialogHeader>
+    <FormDialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
+      title={<>Ressource bearbeiten</>}
+      description={<>Der Name bleibt in der Liste der einzige.</>}
+      submitLabel="Speichern"
+      onSubmit={submit}
+      busy={busy}
+      error={error}
+      size="sm"
+    >
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="edit-name">Name</Label>
+          <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
 
-        <form className="flex flex-col gap-4" noValidate onSubmit={submit}>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-name">Name</Label>
-            <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="edit-weight">Gewicht (kg)</Label>
+          <Input id="edit-weight" value={weight} onChange={(e) => setWeight(e.target.value)} inputMode="decimal" />
+        </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-weight">Gewicht (kg)</Label>
-            <Input id="edit-weight" value={weight} onChange={(e) => setWeight(e.target.value)} inputMode="decimal" />
-          </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="edit-price">Export-Preis ($)</Label>
+          <Input id="edit-price" value={price} onChange={(e) => setPrice(e.target.value)} inputMode="numeric" />
+        </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-price">Export-Preis ($)</Label>
-            <Input id="edit-price" value={price} onChange={(e) => setPrice(e.target.value)} inputMode="numeric" />
-          </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="edit-category">Kategorie</Label>
+          <Select value={category} onValueChange={(value) => value && setCategory(value as ResourceCategory)}>
+            <SelectTrigger id="edit-category" aria-label="Kategorie">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORY_ORDER.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {CATEGORY_LABEL[c]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-category">Kategorie</Label>
-            <Select value={category} onValueChange={(value) => value && setCategory(value as ResourceCategory)}>
-              <SelectTrigger id="edit-category" aria-label="Kategorie">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORY_ORDER.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {CATEGORY_LABEL[c]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="edit-note">Notiz</Label>
+          <Textarea id="edit-note" value={note} onChange={(e) => setNote(e.target.value)} />
+        </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-note">Notiz</Label>
-            <Textarea id="edit-note" value={note} onChange={(e) => setNote(e.target.value)} />
-          </div>
-
-          {error ? (
-            <p className="text-sm text-destructive" role="alert" aria-live="polite">
-              {error}
-            </p>
-          ) : null}
-
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Abbrechen
-            </Button>
-            <Button type="submit" disabled={busy}>
-              Speichern
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+    </FormDialog>
   );
 }

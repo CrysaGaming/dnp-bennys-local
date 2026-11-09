@@ -2,16 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { FormDialog } from "@/components/form-dialog";
 import {
   Select,
   SelectContent,
@@ -68,65 +61,54 @@ export function BookingDialog({
   }
 
   return (
-    <Dialog open={open}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Buchen – {part.name}</DialogTitle>
-          <DialogDescription>Der Bestand ändert sich nur über diese Buchung.</DialogDescription>
-        </DialogHeader>
+    <FormDialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
+      title={<>Buchen – {part.name}</>}
+      description={<>Der Bestand ändert sich nur über diese Buchung.</>}
+      submitLabel="Buchen"
+      onSubmit={submit}
+      busy={busy}
+      error={error}
+      size="sm"
+    >
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="booking-kind">Art</Label>
+          <Select value={kind} onValueChange={(value) => value && setKind(value as (typeof KINDS)[number]["value"])}>
+            <SelectTrigger id="booking-kind" aria-label="Art">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {KINDS.map((k) => (
+                <SelectItem key={k.value} value={k.value}>
+                  {k.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <form className="flex flex-col gap-4" noValidate onSubmit={submit}>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="booking-kind">Art</Label>
-            <Select value={kind} onValueChange={(value) => value && setKind(value as (typeof KINDS)[number]["value"])}>
-              <SelectTrigger id="booking-kind" aria-label="Art">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {KINDS.map((k) => (
-                  <SelectItem key={k.value} value={k.value}>
-                    {k.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="booking-amount">Menge</Label>
+          <Input
+            id="booking-amount"
+            type="number"
+            step={1}
+            value={amount}
+            onChange={(e) => setAmount(Number(e.target.value))}
+          />
+          <p className="text-xs text-muted-foreground">
+            Korrektur auch mit Minus – die Zahl ist die Änderung in {part.unit}.
+          </p>
+        </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="booking-amount">Menge</Label>
-            <Input
-              id="booking-amount"
-              type="number"
-              step={1}
-              value={amount}
-              onChange={(e) => setAmount(Number(e.target.value))}
-            />
-            <p className="text-xs text-muted-foreground">
-              Korrektur auch mit Minus – die Zahl ist die Änderung in {part.unit}.
-            </p>
-          </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="booking-note">Notiz{needsNote ? " (Pflicht)" : ""}</Label>
+          <Input id="booking-note" value={note} onChange={(e) => setNote(e.target.value)} />
+        </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="booking-note">Notiz{needsNote ? " (Pflicht)" : ""}</Label>
-            <Input id="booking-note" value={note} onChange={(e) => setNote(e.target.value)} />
-          </div>
-
-          {error ? (
-            <p className="text-sm text-destructive" role="alert" aria-live="polite">
-              {error}
-            </p>
-          ) : null}
-
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Abbrechen
-            </Button>
-            <Button type="submit" disabled={busy}>
-              Buchen
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+    </FormDialog>
   );
 }
